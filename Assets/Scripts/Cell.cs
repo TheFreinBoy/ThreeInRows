@@ -23,8 +23,7 @@ public class Cell : MonoBehaviour , IPointerDownHandler , IPointerUpHandler
        _cellData = cellData;
        _image.sprite = sprite;
        _cellMover = cellMover;
-        UpdateName();
-        ResetPosition();
+
    }
    public bool UpdateCell()
     {
@@ -58,5 +57,12 @@ public class Cell : MonoBehaviour , IPointerDownHandler , IPointerUpHandler
     public void ResetPosition()
     {
         _position = BoardService.GetBoardPositionFromPoint(Point);
+    }
+    public void SetCellPoint(Point point)
+    {
+        _cellData.point = point;
+        UpdateName();
+        ResetPosition();
+        
     }
 }

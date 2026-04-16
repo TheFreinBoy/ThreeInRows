@@ -21,5 +21,22 @@ public class CellData
         this.cellType = cellType;
         this.point = point;
     }
+    public Cell GetCell()
+    {
+        return _cell;
+    }
+    public void SetCell(Cell newCell)
+    {
+        _cell = newCell;
+        if (newCell == null)
+        {
+            cellType = CellType.Blank;
+        }
+        else
+        {
+            cellType = newCell.CellType;
+            _cell.SetCellPoint(point);
+        }
+    }
 
 }

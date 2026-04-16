@@ -40,7 +40,7 @@ public class MatchMachine
         return connectedPoints;
     }
 
-    private static void AddPoints(ref List<Point> points, List<Point> addPoints)
+    public static void AddPoints(ref List<Point> points, List<Point> addPoints)
     {
         foreach (var addPoint in addPoints)
         {
@@ -74,7 +74,7 @@ public class MatchMachine
                 }
                
             }
-            if (line.Count > 1)
+            if (line.Count > 2)
             {
                 AddPoints(ref connectedPoints, line);
             }
@@ -98,7 +98,7 @@ public class MatchMachine
                 if (_boardService.GetCellTypeAtPoint(checkPoint) == cellTypeAtPoint)
                     line.Add(checkPoint);
             }
-            if (line.Count > 1)
+            if (line.Count > 2)
                 AddPoints(ref connectedPoints, line);
         }
     }

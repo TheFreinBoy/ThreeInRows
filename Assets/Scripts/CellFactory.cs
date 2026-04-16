@@ -25,7 +25,8 @@ public class CellFactory: MonoBehaviour
                 
                 var cell = InstantiateCell();
                 cell.rect.anchoredPosition = BoardService.GetBoardPositionFromPoint(point);
-                cell.Initialize(cellData, boardService.CellSprites[(int)(cellType - 1)], cellMover);
+                cell.Initialize(new CellData(cellType, new Point(x,y)), boardService.CellSprites[(int)(cellType - 1)], cellMover);
+                cellData.SetCell(cell);
             }
         }
     }

@@ -17,6 +17,7 @@ public class BoardService : MonoBehaviour
     public Sprite[] CellSprites => _cellSprites;
 
     private readonly List <Cell> _updatingCells = new List<Cell>();
+    private readonly List <CellFlip> _flippedCells = new List<CellFlip>();
     private void Awake()
     {
         _cellFactory = GetComponent<CellFactory>();
@@ -42,10 +43,75 @@ public class BoardService : MonoBehaviour
         }
         foreach (var cell in finishedUpdating)
         {
+            var flip = GetFlip(cell);
+            var connectedPoints = _matchMachine.GetMatchedPoints(cell.Point, true);
+            Cell flippedCell = null;
+            if(flip != null)
+            {
+                flippedCell = flip.GetOtherCell(cell);
+                MatchMachine.AddPoints(ref connectedPoints, _matchMachine.GetMatchedPoints(flippedCell.Point, true));
+            }
+            if(connectedPoints.Count == 0)
+            {
+                if(flippedCell != null)
+                    FlipCells(cell.Point, flippedCell.Point, false);
+            }
+            else
+            {
+                print("match");
+                foreach (var connectedPoint in connectedPoints)
+                {
+                    var cellAtPoint = GetCellAtPoint(connectedPoint);
+                    var connectedCell = cellAtPoint.GetCell();
+                    if (connectedCell != null)
+                    {
+                        connectedCell.gameObject.SetActive(false);
+                    }
+                    cellAtPoint.SetCell(null);
+                }
+            }
+
+            _flippedCells.Remove(flip);
             _updatingCells.Remove(cell);
         }
         
     }
+    public void FlipCells(Point firstPoint, Point secondPoint, bool main)
+    {
+        if(GetCellTypeAtPoint(firstPoint) < 0 )
+            return;
+
+        var firstCellData = GetCellAtPoint(firstPoint);
+        var firstCell = firstCellData.GetCell();
+        if(GetCellTypeAtPoint(secondPoint) > 0)
+        {
+            var secondCellData = GetCellAtPoint(secondPoint);
+            var secondCell = secondCellData.GetCell();
+            firstCellData.SetCell(secondCell);
+            secondCellData.SetCell(firstCell);
+
+            if(main)
+                _flippedCells.Add(new CellFlip(firstCell, secondCell));
+            
+            _updatingCells.Add(firstCell);
+            _updatingCells.Add(secondCell);
+        }
+        else
+        {
+            ResetCell(firstCell);
+        }
+    }
+    
+    private CellFlip GetFlip(Cell cell)
+    {
+        foreach (var flip in _flippedCells)
+        {
+            if (flip.GetOtherCell(cell) != null)
+                return flip;
+        }
+        return null;
+    }
+
     public void ResetCell(Cell cell)
     {
         cell.ResetPosition();
@@ -130,4 +196,5 @@ public class BoardService : MonoBehaviour
             Config.PieceSize/2 + Config.PieceSize * point.x, 
             -Config.PieceSize/2 - Config.PieceSize * point.y);
     }
+
 }
