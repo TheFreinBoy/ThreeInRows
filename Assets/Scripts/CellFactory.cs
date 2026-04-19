@@ -32,7 +32,7 @@ public class CellFactory: MonoBehaviour
     }
     
 
-     private Cell InstantiateCell()
+    public Cell InstantiateCell()
     {
         return Instantiate(_cellPrefab, _boardRect);
     }

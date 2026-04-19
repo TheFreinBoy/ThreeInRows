@@ -10,14 +10,19 @@ public class BoardService : MonoBehaviour
     public ArrayLayout boardLayout;
 
     [SerializeField] private Sprite[] _cellSprites;
+    [SerializeField] private ParticleSystem _matchFxPrefab;
+    [SerializeField] private ScoreService _scoreService;
     private CellData[,] _board;
     private CellFactory _cellFactory;
     private MatchMachine _matchMachine;
     private CellMover _cellMover;
+    private readonly int[] _fillingCellsCountByColumn = new int[Config.BoardWidth];
     public Sprite[] CellSprites => _cellSprites;
-
+    
     private readonly List <Cell> _updatingCells = new List<Cell>();
+    private readonly List <Cell> _deadCells = new List<Cell>();
     private readonly List <CellFlip> _flippedCells = new List<CellFlip>();
+    private readonly List <ParticleSystem> _matchFxs = new List<ParticleSystem>();
     private void Awake()
     {
         _cellFactory = GetComponent<CellFactory>();
@@ -43,6 +48,9 @@ public class BoardService : MonoBehaviour
         }
         foreach (var cell in finishedUpdating)
         {
+            var x = cell.Point.x;
+            _fillingCellsCountByColumn[x] = Mathf.Clamp(_fillingCellsCountByColumn[x] - 1, 0, Config.BoardWidth);
+
             var flip = GetFlip(cell);
             var connectedPoints = _matchMachine.GetMatchedPoints(cell.Point, true);
             Cell flippedCell = null;
@@ -58,23 +66,103 @@ public class BoardService : MonoBehaviour
             }
             else
             {
-                print("match");
                 foreach (var connectedPoint in connectedPoints)
                 {
                     var cellAtPoint = GetCellAtPoint(connectedPoint);
                     var connectedCell = cellAtPoint.GetCell();
+                    
+                    // Particles FX.
+                    ParticleSystem matchFx;
+                    if (_matchFxs.Count > 0 && _matchFxs[0].isStopped)
+                    {
+                        matchFx = _matchFxs[0];
+                        _matchFxs.RemoveAt(0);
+                    }
+                    else
+                    {
+                        matchFx = Instantiate(_matchFxPrefab, transform);
+                    }
+                    _matchFxs.Add(matchFx);
+                    matchFx.Play();
+                    matchFx.transform.position = connectedCell != null ? connectedCell.rect.transform.position : Vector3.zero;
+
                     if (connectedCell != null)
                     {
                         connectedCell.gameObject.SetActive(false);
+                        _deadCells.Add(connectedCell);
                     }
                     cellAtPoint.SetCell(null);
                 }
+                _scoreService.AddScore(connectedPoints.Count);
             }
 
             _flippedCells.Remove(flip);
             _updatingCells.Remove(cell);
         }
+
+        ApplyGravityToBoard();
         
+    }
+    private void ApplyGravityToBoard()
+    {
+        for (int x = 0; x < Config.BoardWidth; x++)
+        {
+            for (int y = Config.BoardHeight - 1; y >= 0; y--)
+            {
+                var point = new Point(x, y);
+                var cellData = GetCellAtPoint(point);
+                var cellTypeAtPoint = GetCellTypeAtPoint(point);
+
+                if(cellTypeAtPoint != 0)
+                    continue;
+
+                for (int newY = y - 1; newY >= -1; newY--)
+                {
+                    var nextPoint = new Point(x, newY);
+                    var nextCellType = GetCellTypeAtPoint(nextPoint);
+                    if (nextCellType == 0)
+                        continue;
+
+                    if (nextCellType != CellData.CellType.Hole)
+                    {
+                        var cellAtPoint = GetCellAtPoint(nextPoint);
+                        var cell = cellAtPoint.GetCell();
+
+                        cellData.SetCell(cell);
+                        _updatingCells.Add(cell);
+
+                        cellAtPoint.SetCell(null);
+                    }                                        
+                    else  // Generate new cell above the board after the match.
+                    {
+                        var cellType = GetRandomCellType();
+                        var fallPoint = new Point(x, -1 - _fillingCellsCountByColumn[x]);
+                        Cell cell;
+                        if (_deadCells.Count > 0)
+                        {
+                            var revivedCell = _deadCells[0];
+                            revivedCell.gameObject.SetActive(true);
+                            cell = revivedCell;
+                            _deadCells.RemoveAt(0);
+                        }
+                        else
+                        {
+                            cell = _cellFactory.InstantiateCell();
+                        }
+
+                        cell.Initialize(new CellData(cellType, point), _cellSprites[(int)(cellType - 1)], _cellMover);
+                        cell.rect.anchoredPosition = GetBoardPositionFromPoint(fallPoint);
+                        
+
+                        var holeCell = GetCellAtPoint(point);
+                        holeCell.SetCell(cell);
+                        ResetCell(cell);
+                        _fillingCellsCountByColumn[x]++;
+                    }
+                    break;
+                }
+            }
+        }
     }
     public void FlipCells(Point firstPoint, Point secondPoint, bool main)
     {

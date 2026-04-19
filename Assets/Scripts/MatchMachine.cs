@@ -98,8 +98,11 @@ public class MatchMachine
                 if (_boardService.GetCellTypeAtPoint(checkPoint) == cellTypeAtPoint)
                     line.Add(checkPoint);
             }
-            if (line.Count > 2)
+            if (line.Count > 1)
+            {
+                line.Add(point);
                 AddPoints(ref connectedPoints, line);
+            }
         }
     }
     private void CheckForSquareMatch(ref List<Point> connectedPoints, Point point, CellData.CellType cellTypeAtPoint)
