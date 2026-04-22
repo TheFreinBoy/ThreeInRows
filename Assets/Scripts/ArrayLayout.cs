@@ -1,3 +1,4 @@
+using Match3;
 using Unity.VisualScripting;
 using StaticData;
 
@@ -10,5 +11,5 @@ public class ArrayLayout
     {
        public bool[] row;
     }
-    public RowData[] rows = new RowData[16];
+    public RowData[] rows = new RowData[Config.BoardWidth];
 }

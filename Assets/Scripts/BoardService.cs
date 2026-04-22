@@ -10,14 +10,43 @@ public class BoardService : MonoBehaviour
     public ArrayLayout boardLayout;
 
     [SerializeField] private Sprite[] _cellSprites;
+    [SerializeField] private Sprite _holeSprite;
+    [SerializeField] private Sprite _bombSprite;
+    [SerializeField] private Sprite _verticalBonusSprite;
     [SerializeField] private ParticleSystem _matchFxPrefab;
+    [SerializeField] private ParticleSystem _bombExplosionFxPrefab;
+    [SerializeField] private ParticleSystem _verticalBonusEffectFxPrefab;
     [SerializeField] private ScoreService _scoreService;
+    [SerializeField] private TimerService _timerService;
+    [SerializeField] private GameStateService _gameStateService;
+    private const float BonusSpawnChance = 0.025f; 
     private CellData[,] _board;
     private CellFactory _cellFactory;
     private MatchMachine _matchMachine;
     private CellMover _cellMover;
     private readonly int[] _fillingCellsCountByColumn = new int[Config.BoardWidth];
     public Sprite[] CellSprites => _cellSprites;
+
+    public Sprite GetSpriteForCellType(CellData.CellType cellType)
+    {
+        if (cellType == CellData.CellType.Hole)
+            return _holeSprite;
+        if (cellType == CellData.CellType.Bomb)
+            return _bombSprite;
+        if (cellType == CellData.CellType.VerticalBonus)
+            return _verticalBonusSprite;
+        if (cellType <= 0)
+            return null;
+        return _cellSprites[(int)(cellType - 1)];
+    }
+
+    public bool CanMakeMove()
+    {
+        if (_gameStateService != null && _gameStateService.IsGameOver)
+            return false;
+        
+        return _flippedCells.Count == 0 && _updatingCells.Count == 0;
+    }
     
     private readonly List <Cell> _updatingCells = new List<Cell>();
     private readonly List <Cell> _deadCells = new List<Cell>();
@@ -35,6 +64,12 @@ public class BoardService : MonoBehaviour
        InitializeBoard();
        VerifyBoardOnMathes();
        _cellFactory.InstantiateBoard(this, _cellMover);
+       
+       if (_gameStateService != null)
+           _gameStateService.Initialize();
+       
+       if (_timerService != null)
+           _timerService.OnTimeExpired += OnGameOver;
     }
     private void Update()
     {
@@ -94,6 +129,8 @@ public class BoardService : MonoBehaviour
                     cellAtPoint.SetCell(null);
                 }
                 _scoreService.AddScore(connectedPoints.Count);
+                if (_timerService != null)
+                    _timerService.AddTimeOnMatch(connectedPoints.Count);
             }
 
             _flippedCells.Remove(flip);
@@ -150,7 +187,7 @@ public class BoardService : MonoBehaviour
                             cell = _cellFactory.InstantiateCell();
                         }
 
-                        cell.Initialize(new CellData(cellType, point), _cellSprites[(int)(cellType - 1)], _cellMover);
+                        cell.Initialize(new CellData(cellType, point), GetSpriteForCellType(cellType), _cellMover, this);
                         cell.rect.anchoredPosition = GetBoardPositionFromPoint(fallPoint);
                         
 
@@ -168,9 +205,19 @@ public class BoardService : MonoBehaviour
     {
         if(GetCellTypeAtPoint(firstPoint) < 0 )
             return;
-
+        
         var firstCellData = GetCellAtPoint(firstPoint);
         var firstCell = firstCellData.GetCell();
+        
+        if (GetCellTypeAtPoint(firstPoint) == CellData.CellType.Bomb || 
+            GetCellTypeAtPoint(secondPoint) == CellData.CellType.Bomb ||
+            GetCellTypeAtPoint(firstPoint) == CellData.CellType.VerticalBonus ||
+            GetCellTypeAtPoint(secondPoint) == CellData.CellType.VerticalBonus)
+        {
+            ResetCell(firstCell);
+            return;
+        }
+
         if(GetCellTypeAtPoint(secondPoint) > 0)
         {
             var secondCellData = GetCellAtPoint(secondPoint);
@@ -205,6 +252,100 @@ public class BoardService : MonoBehaviour
         cell.ResetPosition();
         _updatingCells.Add(cell);
     }
+
+    public void ExplodeBomb(Point bombPoint)
+    {
+        var destroyedCount = 0;
+        var bombCellData = GetCellAtPoint(bombPoint);
+        var bombCell = bombCellData.GetCell();
+        
+        if (_bombExplosionFxPrefab != null && bombCell != null)
+        {
+            var explosionFx = Instantiate(_bombExplosionFxPrefab, transform);
+            explosionFx.transform.position = bombCell.rect.transform.position;
+            explosionFx.Play();
+        }
+        
+        for (int x = bombPoint.x - 1; x <= bombPoint.x + 1; x++)
+        {
+            for (int y = bombPoint.y - 1; y <= bombPoint.y + 1; y++)
+            {
+                var point = new Point(x, y);
+                var cellType = GetCellTypeAtPoint(point);
+                
+                if (cellType == CellData.CellType.Hole)
+                    continue;
+                
+                var cellData = GetCellAtPoint(point);
+                var cell = cellData.GetCell();
+                
+                if (cell != null)
+                {
+                    ParticleSystem matchFx;
+                    if (_matchFxs.Count > 0 && _matchFxs[0].isStopped)
+                    {
+                        matchFx = _matchFxs[0];
+                        _matchFxs.RemoveAt(0);
+                    }
+                    else
+                    {
+                        matchFx = Instantiate(_matchFxPrefab, transform);
+                    }
+                    _matchFxs.Add(matchFx);
+                    matchFx.Play();
+                    matchFx.transform.position = cell.rect.transform.position;
+                    
+                    cell.gameObject.SetActive(false);
+                    _deadCells.Add(cell);
+                    destroyedCount++;
+                }
+                
+                cellData.SetCell(null);
+            }
+        }
+        
+        _scoreService.AddScore(destroyedCount);
+        if (_timerService != null)
+            _timerService.AddTimeOnMatch(destroyedCount);
+    }
+    
+    public void DestroyVerticalLine(Point bonusPoint)
+    {
+        var destroyedCount = 0;
+        
+        for (int y = 0; y < Config.BoardHeight; y++)
+        {
+            var point = new Point(bonusPoint.x, y);
+            var cellType = GetCellTypeAtPoint(point);
+            
+            if (cellType == CellData.CellType.Hole )
+                continue;
+            
+            var cellData = GetCellAtPoint(point);
+            var cell = cellData.GetCell();
+            
+            if (_verticalBonusEffectFxPrefab != null && cell != null)
+            {
+                var effectFx = Instantiate(_verticalBonusEffectFxPrefab, transform);
+                effectFx.transform.position = cell.rect.transform.position;
+                effectFx.Play();
+            }
+            
+            if (cell != null)
+            {
+                cell.gameObject.SetActive(false);
+                _deadCells.Add(cell);
+                destroyedCount++;
+            }
+            
+            cellData.SetCell(null);
+        }
+        
+        _scoreService.AddScore(destroyedCount);
+        if (_timerService != null)
+            _timerService.AddTimeOnMatch(destroyedCount);
+    }
+    
     private void VerifyBoardOnMathes()
     {
         for (int y = 0; y < Config.BoardHeight; y++)
@@ -275,7 +416,14 @@ public class BoardService : MonoBehaviour
 
     private CellData.CellType GetRandomCellType()
     {
-        return (CellData.CellType)(Random.Range(0, _cellSprites.Length) + 1);
+        float randomValue = Random.value;
+        
+        if (randomValue < BonusSpawnChance)
+        {
+            return Random.value < 0.3f ? CellData.CellType.VerticalBonus : CellData.CellType.Bomb;
+        }
+        
+        return (CellData.CellType)(Random.Range(1, _cellSprites.Length + 1));
     }
    
     public static Vector2 GetBoardPositionFromPoint(Point point)
@@ -285,4 +433,9 @@ public class BoardService : MonoBehaviour
             -Config.PieceSize/2 - Config.PieceSize * point.y);
     }
 
+    private void OnGameOver()
+    {
+        if (_gameStateService != null)
+            _gameStateService.EndGame();
+    }
 }

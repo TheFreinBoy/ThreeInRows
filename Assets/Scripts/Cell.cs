@@ -9,6 +9,7 @@ public class Cell : MonoBehaviour , IPointerDownHandler , IPointerUpHandler
    [SerializeField] private Image _image;
    private CellData _cellData;
    private CellMover _cellMover;
+   private BoardService _boardService;
    [SerializeField] private float _moveSpeed = 10f;
    private Vector2 _position;
    private bool _isUdating;
@@ -18,12 +19,12 @@ public class Cell : MonoBehaviour , IPointerDownHandler , IPointerUpHandler
     }
    public Point Point => _cellData.point;
    public CellData.CellType CellType => _cellData.cellType;
-   public void Initialize(CellData cellData, Sprite sprite, CellMover cellMover)
+   public void Initialize(CellData cellData, Sprite sprite, CellMover cellMover, BoardService boardService)
    {
        _cellData = cellData;
        _image.sprite = sprite;
        _cellMover = cellMover;
-
+       _boardService = boardService;
    }
    public bool UpdateCell()
     {
@@ -44,6 +45,24 @@ public class Cell : MonoBehaviour , IPointerDownHandler , IPointerUpHandler
     
     public void OnPointerDown(PointerEventData eventData)
     {
+        if (_cellData.cellType <= 0)
+            return;
+        
+        if (_cellData.cellType == CellData.CellType.VerticalBonus)
+        {
+            _boardService.DestroyVerticalLine(Point);
+            return;
+        }
+        
+        if (_cellData.cellType == CellData.CellType.Bomb)
+        {
+            _boardService.ExplodeBomb(Point);
+            return;
+        }
+        
+        if (!_boardService.CanMakeMove())
+            return;
+        
         _cellMover.MoveCell(this);
     }
     public void OnPointerUp(PointerEventData eventData)

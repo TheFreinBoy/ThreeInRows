@@ -20,12 +20,13 @@ public class CellFactory: MonoBehaviour
                 var cellData = boardService.GetCellAtPoint(point);    
                 var cellType = cellData.cellType;
 
-                if (cellType <= 0)          
+                if (cellType == CellData.CellType.Blank)          
                     continue;
                 
                 var cell = InstantiateCell();
                 cell.rect.anchoredPosition = BoardService.GetBoardPositionFromPoint(point);
-                cell.Initialize(new CellData(cellType, new Point(x,y)), boardService.CellSprites[(int)(cellType - 1)], cellMover);
+                var sprite = boardService.GetSpriteForCellType(cellType);
+                cell.Initialize(new CellData(cellType, new Point(x,y)), sprite, cellMover, boardService);
                 cellData.SetCell(cell);
             }
         }

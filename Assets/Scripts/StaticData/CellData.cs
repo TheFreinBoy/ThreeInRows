@@ -10,7 +10,8 @@ public class CellData
         Red = 4,
         White = 5,
         Yellow = 6,
-
+        Bomb = 7,
+        VerticalBonus = 8,
     }
 
     public CellType cellType;
