@@ -20,7 +20,7 @@ public class CellFactory: MonoBehaviour
                 var cellData = boardService.GetCellAtPoint(point);    
                 var cellType = cellData.cellType;
 
-                if (cellType == CellData.CellType.Blank)          
+                if (cellType == CellData.CellType.Blank || cellType == CellData.CellType.Hole)          
                     continue;
                 
                 var cell = InstantiateCell();

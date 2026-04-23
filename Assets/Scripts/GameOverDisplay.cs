@@ -3,11 +3,11 @@ using DG.Tweening;
 
 public class GameOverDisplay : MonoBehaviour
 {
-    [Header("Ссылки на UI")]
     [SerializeField] private GameObject _board;          
-    [SerializeField] private GameObject _endGamePanel; 
-
-    [Header("Сервис состояния")]
+    [SerializeField] private GameObject _endGamePanel;
+    [SerializeField] private GameObject _score;
+    [SerializeField] private GameObject _time;
+    
     [SerializeField] private GameStateService _gameState; 
 
     private void OnEnable()
@@ -25,11 +25,18 @@ public class GameOverDisplay : MonoBehaviour
             _gameState.OnGameOver -= HandleGameOver;
         }
     }
+
+    private void DisActiveBoard()
+    {
+        _board.SetActive(false);
+        _score.SetActive(false);
+        _time.SetActive(false);
+    }
     
     private void HandleGameOver()
     {
         if (_board != null)
-            _board.SetActive(false); 
+            DisActiveBoard();  
 
         if (_endGamePanel != null)
             _endGamePanel.SetActive(true); 

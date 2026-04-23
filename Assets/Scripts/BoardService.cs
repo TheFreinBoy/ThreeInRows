@@ -10,7 +10,6 @@ public class BoardService : MonoBehaviour
     public ArrayLayout boardLayout;
 
     [SerializeField] private Sprite[] _cellSprites;
-    [SerializeField] private Sprite _holeSprite;
     [SerializeField] private Sprite _bombSprite;
     [SerializeField] private Sprite _verticalBonusSprite;
     [SerializeField] private ParticleSystem _matchFxPrefab;
@@ -26,28 +25,7 @@ public class BoardService : MonoBehaviour
     private CellMover _cellMover;
     private readonly int[] _fillingCellsCountByColumn = new int[Config.BoardWidth];
     public Sprite[] CellSprites => _cellSprites;
-
-    public Sprite GetSpriteForCellType(CellData.CellType cellType)
-    {
-        if (cellType == CellData.CellType.Hole)
-            return _holeSprite;
-        if (cellType == CellData.CellType.Bomb)
-            return _bombSprite;
-        if (cellType == CellData.CellType.VerticalBonus)
-            return _verticalBonusSprite;
-        if (cellType <= 0)
-            return null;
-        return _cellSprites[(int)(cellType - 1)];
-    }
-
-    public bool CanMakeMove()
-    {
-        if (_gameStateService != null && _gameStateService.IsGameOver)
-            return false;
-        
-        return _flippedCells.Count == 0 && _updatingCells.Count == 0;
-    }
-    
+ 
     private readonly List <Cell> _updatingCells = new List<Cell>();
     private readonly List <Cell> _deadCells = new List<Cell>();
     private readonly List <CellFlip> _flippedCells = new List<CellFlip>();
@@ -437,5 +415,25 @@ public class BoardService : MonoBehaviour
     {
         if (_gameStateService != null)
             _gameStateService.EndGame();
+    }
+    public Sprite GetSpriteForCellType(CellData.CellType cellType)
+    {
+        if (cellType == CellData.CellType.Hole)
+            return null;
+        if (cellType == CellData.CellType.Bomb)
+            return _bombSprite;
+        if (cellType == CellData.CellType.VerticalBonus)
+            return _verticalBonusSprite;
+        if (cellType <= 0)
+            return null;
+        return _cellSprites[(int)(cellType - 1)];
+    }
+
+    public bool CanMakeMove()
+    {
+        if (_gameStateService != null && _gameStateService.IsGameOver)
+            return false;
+        
+        return _flippedCells.Count == 0 && _updatingCells.Count == 0;
     }
 }
