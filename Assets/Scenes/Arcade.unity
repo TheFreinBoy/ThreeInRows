@@ -275,7 +275,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &374351440
 RectTransform:
   m_ObjectHideFlags: 0
@@ -305,7 +305,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 374351439}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -345,7 +345,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 499067340}
-  - component: {fileID: 499067339}
+  - component: {fileID: 499067341}
   m_Layer: 0
   m_Name: GameEndService
   m_TagString: Untagged
@@ -353,18 +353,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &499067339
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 499067338}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0802916d225582b48bedbc950e860e1f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GameStateService
 --- !u!4 &499067340
 Transform:
   m_ObjectHideFlags: 0
@@ -380,6 +368,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &499067341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 499067338}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55b1c0a677fd40645ae19da92d475913, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameStateService
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -870,6 +870,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScoreService
   _scoreText: {fileID: 652829815}
+  _finalScoreText: {fileID: 903634313}
+  _gameState: {fileID: 499067341}
 --- !u!114 &652829815
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1727,7 +1729,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b1b72be53ff51141b88a41cb47a9735, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScoreService
-  _scoreText: {fileID: 903634313}
+  _scoreText: {fileID: 652829815}
+  _finalScoreText: {fileID: 903634313}
+  _gameState: {fileID: 499067341}
 --- !u!114 &903634313
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1838,6 +1842,7 @@ GameObject:
   m_Component:
   - component: {fileID: 937934443}
   - component: {fileID: 937934442}
+  - component: {fileID: 937934444}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -1857,7 +1862,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0759972e87e8ada44be14ad35db1e05c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Manager
-  _board: {fileID: 1644294349}
 --- !u!4 &937934443
 Transform:
   m_ObjectHideFlags: 0
@@ -1873,6 +1877,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &937934444
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 937934441}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e35d1de83b9f1d41bdb377e41fcdea9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameOverDisplay
+  _board: {fileID: 1644294349}
+  _endGamePanel: {fileID: 374351439}
+  _gameState: {fileID: 499067341}
 --- !u!1 &1020920517
 GameObject:
   m_ObjectHideFlags: 0
@@ -2299,7 +2318,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TimerService
   _timerText: {fileID: 664361639}
-  _initialTime: 30
+  _initialTime: 5
   _timeAddOnMatch: 1
 --- !u!4 &1559815438
 Transform:
@@ -2336,7 +2355,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1644294350
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2396,7 +2415,7 @@ MonoBehaviour:
   _verticalBonusEffectFxPrefab: {fileID: 1689696279020676701, guid: d0e266041752cef4e9716378b1c887d6, type: 3}
   _scoreService: {fileID: 652829814}
   _timerService: {fileID: 1559815437}
-  _gameStateService: {fileID: 499067339}
+  _gameStateService: {fileID: 499067341}
 --- !u!114 &1644294352
 MonoBehaviour:
   m_ObjectHideFlags: 0

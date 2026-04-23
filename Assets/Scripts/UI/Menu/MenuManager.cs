@@ -11,6 +11,37 @@ public class MenuManager : MonoBehaviour
     [SerializeField] private GameObject _settingsButton;
     [SerializeField] private GameObject _leaderBoardPanel;
     [SerializeField] private GameObject _leaderBoardButton;
+    [SerializeField] private TMP_InputField _nameInputField;
+
+    private void Start()
+    {
+        if (_nameInputField != null)
+        {
+            string savedName = PlayerPrefs.GetString("CurrentPlayerName", "");
+            
+            if (string.IsNullOrWhiteSpace(savedName))
+            {
+                savedName = "Player" + Random.Range(1000, 10000);
+                PlayerPrefs.SetString("CurrentPlayerName", savedName);
+                PlayerPrefs.Save();
+            }
+            
+            _nameInputField.text = savedName;
+        }
+    }
+    
+    public void SavePlayerName(string newName)
+    {
+        if (string.IsNullOrWhiteSpace(newName))
+        {
+            newName = "Player" + Random.Range(1000, 10000);
+            
+            _nameInputField.text = newName; 
+        }
+        
+        PlayerPrefs.SetString("CurrentPlayerName", newName);
+        PlayerPrefs.Save();
+    }
 
     private void CloseMainPanel()
     {

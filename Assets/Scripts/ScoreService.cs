@@ -47,6 +47,8 @@ public class ScoreService : MonoBehaviour
 
     private void UpdateFinalScore()
     {
+        string currentPlayer = PlayerPrefs.GetString("CurrentPlayerName", "Player");
+        Leaderboard.SaveScore(currentPlayer, _score);
         if (_finalScoreText != null)
         {
             _finalScoreText.text = "0";
