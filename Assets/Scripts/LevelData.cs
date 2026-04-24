@@ -13,7 +13,5 @@ public class LevelData : ScriptableObject
     public float initialTime = 60f;
     public int targetScore = 1000;
     
-
-    [Range(3, 6)]
-    public int availableColors = 5; 
+    
 }

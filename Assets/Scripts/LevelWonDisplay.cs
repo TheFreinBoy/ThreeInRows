@@ -1,16 +1,16 @@
-using UnityEngine;
+﻿using UnityEngine;
 using DG.Tweening;
 using UI;
 
-public class GameOverDisplay : MonoBehaviour
+public class LevelWonDisplay : MonoBehaviour
 {
     [SerializeField] private GameObject _board;          
-    [SerializeField] private GameObject _endGamePanel;
+    [SerializeField] private GameObject _winPanel; 
     [SerializeField] private GameObject _score;
     [SerializeField] private GameObject _time;
     [SerializeField] private GameObject _pauseButton;
     
-    [SerializeField] private GameStateService _gameState; 
+    [SerializeField] private GameStateService _gameState;
     
     public PauseManager pauseManager;
 
@@ -18,7 +18,7 @@ public class GameOverDisplay : MonoBehaviour
     {
         if (_gameState != null)
         {
-            _gameState.OnGameOver += HandleGameOver;
+            _gameState.OnLevelWon += HandleLevelWon;
         }
     }
 
@@ -26,7 +26,7 @@ public class GameOverDisplay : MonoBehaviour
     {
         if (_gameState != null)
         {
-            _gameState.OnGameOver -= HandleGameOver;
+            _gameState.OnLevelWon -= HandleLevelWon;
         }
     }
 
@@ -38,20 +38,18 @@ public class GameOverDisplay : MonoBehaviour
         _pauseButton.SetActive(false);
     }
     
-    private void HandleGameOver()
+    private void HandleLevelWon()
     {
         if (_board != null)
-            DisActiveBoard();
+            DisActiveBoard();  
 
-
-        if (_endGamePanel != null)
+        if (_winPanel != null)
         {
             pauseManager.SetPauseEnabled(false);
-            _endGamePanel.SetActive(true); 
+            _winPanel.SetActive(true); 
+            _winPanel.transform.localScale = Vector3.zero;
+            
+            _winPanel.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutBack);
         }
-        _endGamePanel.transform.localScale = Vector3.zero;
-        
-        _endGamePanel.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutBack);
-        
     }
 }

@@ -45,7 +45,6 @@ public class BoardService : MonoBehaviour
         
         if (_currentLevel == null)
         {
-            Debug.LogError("Уровень не выбран! Назначьте его в Инспекторе или запустите из меню.");
             return;
         }
         
@@ -80,15 +79,23 @@ public class BoardService : MonoBehaviour
     }
     void Start()
     {
-       InitializeBoard();
-       VerifyBoardOnMathes();
-       _cellFactory.InstantiateBoard(this, _cellMover);
-       
-       if (_gameStateService != null)
-           _gameStateService.Initialize();
-       
-       if (_timerService != null)
-           _timerService.OnTimeExpired += OnGameOver;
+        InitializeBoard();
+        VerifyBoardOnMathes();
+        _cellFactory.InstantiateBoard(this, _cellMover);
+        
+        if (_timerService != null)
+        {
+            _timerService.Initialize(_currentLevel.initialTime);
+            _timerService.OnTimeExpired += OnGameOver;
+        }
+        
+        if (_scoreService != null)
+        {
+            _scoreService.Initialize(_currentLevel.targetScore);
+        }
+
+        if (_gameStateService != null)
+            _gameStateService.Initialize();
     }
     private void Update()
     {
@@ -207,7 +214,7 @@ public class BoardService : MonoBehaviour
             {
                 var cellType = _currentLevel.boardLayout.rows[y].row[x] 
                     ? CellData.CellType.Hole 
-                    : (CellData.CellType)(Random.Range(1, _currentLevel.availableColors + 1));
+                    : (CellData.CellType)(Random.Range(1, 7));
                 
                 _board[x, y] = new CellData(cellType, new Point(x, y));
             }

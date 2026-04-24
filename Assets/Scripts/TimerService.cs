@@ -14,6 +14,13 @@ public class TimerService : MonoBehaviour
     public event Action OnTimeExpired;
     public float RemainingTime => _remainingTime;
     public bool IsRunning => _isRunning;
+    
+    public void Initialize(float time)
+    {
+        _remainingTime = time;
+        _isRunning = true;
+        UpdateTimerDisplay();
+    }
 
     void Start()
     {

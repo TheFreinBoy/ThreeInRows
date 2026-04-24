@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Level 1
   m_EditorClassIdentifier: Assembly-CSharp::LevelData
   boardWidth: 10
-  boardHeight: 9
+  boardHeight: 7
   boardLayout:
     rows:
     - row: 01010000010100000101
@@ -23,8 +23,5 @@ MonoBehaviour:
     - row: 00000000000000000000
     - row: 01000000000000000001
     - row: 01010000000000000101
-    - row: 01010000000000000101
-    - row: 01010101000001010101
-  initialTime: 10
+  initialTime: 15
   targetScore: 100
-  availableColors: 6

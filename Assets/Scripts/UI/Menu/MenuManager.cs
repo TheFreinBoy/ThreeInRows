@@ -1,17 +1,17 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace UI.Menu
 {
-    
     public class MenuManager : MonoBehaviour
     {
         [Header("UI Panels")] [SerializeField] private GameObject _mainContent;
         [SerializeField] private GameObject _settingsPanel;
         [SerializeField] private GameObject _playPanel;
-        [SerializeField] private GameObject _settingsButton;
+        [SerializeField] private GameObject _levelPanel;
         [SerializeField] private GameObject _leaderBoardPanel;
+        
+        [SerializeField] private GameObject _settingsButton;
         [SerializeField] private GameObject _leaderBoardButton;
         [SerializeField] private TMP_InputField _nameInputField;
 
@@ -63,6 +63,19 @@ namespace UI.Menu
         {
             CloseMainPanel();
             _leaderBoardPanel.SetActive(true);
+        }
+
+        public void OpenLevelPanel()
+        {
+            ClosePlayPanel();
+            CloseMainPanel();
+            _levelPanel.SetActive(true);
+        }
+
+        public void CloseLevelPanel()
+        {
+            _levelPanel.SetActive(false);
+            OpenPlayPanel();
         }
 
         public void ClosePlayPanel()

@@ -6,37 +6,56 @@ using UI.Menu;
 public class ScoreService : MonoBehaviour
 {
     [SerializeField] private TMP_Text _scoreText;    
-    [SerializeField] private TMP_Text _finalScoreText; 
+    
+    [Header("Тексты финала (перетащи из панелей!)")]
+    [SerializeField] private TMP_Text _winFinalScoreText;   // Текст из панели Победы
+    [SerializeField] private TMP_Text _loseFinalScoreText;  // Текст из панели Поражения
     
     [Header("Сервисы")]
     [SerializeField] private GameStateService _gameState; 
 
-    private int _score;
+    private int _currentScore;
+    private int _targetScore;
+
+    public void Initialize(int target)
+    {
+        _targetScore = target;
+        _currentScore = 0;
+        UpdateScoreDisplay();
+    }
 
     void Start()
     {
-        _score = 0;
-        _scoreText.text = "0";
-
         if (_gameState != null)
         {
-            _gameState.OnGameOver += UpdateFinalScore;
+            // Подписываемся на ОБА исхода игры
+            _gameState.OnGameOver += UpdateLoseScore;
+            _gameState.OnLevelWon += UpdateWinScore;
         }
     }
 
     private void OnDestroy()
     {
-
         if (_gameState != null)
         {
-            _gameState.OnGameOver -= UpdateFinalScore;
+            // Отписываемся от обоих
+            _gameState.OnGameOver -= UpdateLoseScore;
+            _gameState.OnLevelWon -= UpdateWinScore;
         }
     }
 
     public void AddScore(int score)
     {
-        _score += score;
-        _scoreText.text = _score.ToString();
+        _currentScore += score;
+        UpdateScoreDisplay();
+        
+        if (_currentScore >= _targetScore && _targetScore > 0)
+        {
+            if (_gameState != null)
+            {
+                _gameState.WinLevel();
+            }
+        }
         
         if (DOTween.IsTweening(_scoreText.transform))
             DOTween.Kill(_scoreText.transform);
@@ -46,21 +65,36 @@ public class ScoreService : MonoBehaviour
             .Append(_scoreText.transform.DOScale(Vector3.one, 0.3f));
     }
 
-    private void UpdateFinalScore()
+    private void UpdateScoreDisplay()
+    {
+        if (_scoreText)
+        {
+            if (_targetScore > 0)
+                _scoreText.text = $"{_currentScore} / {_targetScore}";
+            else
+                _scoreText.text = _currentScore.ToString();
+        }
+    }
+
+    // --- МЕТОДЫ ДЛЯ ФИНАЛА ---
+    private void UpdateLoseScore() => AnimateFinalScore(_loseFinalScoreText);
+    private void UpdateWinScore() => AnimateFinalScore(_winFinalScoreText);
+
+    private void AnimateFinalScore(TMP_Text targetText)
     {
         string currentPlayer = PlayerPrefs.GetString("CurrentPlayerName", "Player");
-        Leaderboard.SaveScore(currentPlayer, _score);
-        if (_finalScoreText != null)
+        Leaderboard.SaveScore(currentPlayer, _currentScore);
+        
+        if (targetText != null)
         {
-            _finalScoreText.text = "0";
+            targetText.text = "0";
 
-            float countDuration = 1.5f;
-
-            DOVirtual.Int(0, _score, countDuration, (currentValue) =>
+            // .SetUpdate(true) заставляет DOTween работать даже если игра на паузе!
+            DOVirtual.Int(0, _currentScore, 1.5f, (currentValue) =>
             {
-                _finalScoreText.text = currentValue.ToString();
+                targetText.text = currentValue.ToString();
                 
-            }).SetEase(Ease.OutQuad); 
+            }).SetEase(Ease.OutQuad).SetUpdate(true); 
         }
     }
 }
