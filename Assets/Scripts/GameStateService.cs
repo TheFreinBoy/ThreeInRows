@@ -19,7 +19,6 @@ public class GameStateService : MonoBehaviour
             return;
 
         _isGameOver = true;
-        Debug.Log("Game Over! Time's up!");
         OnGameOver?.Invoke();
     }
 

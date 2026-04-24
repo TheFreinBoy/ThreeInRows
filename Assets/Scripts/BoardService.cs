@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using StaticData;
 using UnityEngine;
@@ -7,35 +6,77 @@ using Random = UnityEngine.Random;
 [RequireComponent(typeof(CellFactory))]
 public class BoardService : MonoBehaviour
 {
-    public ArrayLayout boardLayout;
+    [SerializeField] private LevelData _currentLevel;
 
     [SerializeField] private Sprite[] _cellSprites;
     [SerializeField] private Sprite _bombSprite;
     [SerializeField] private Sprite _verticalBonusSprite;
     [SerializeField] private ParticleSystem _matchFxPrefab;
     [SerializeField] private ParticleSystem _bombExplosionFxPrefab;
-    [SerializeField] private ParticleSystem _verticalBonusEffectFxPrefab;
     [SerializeField] private ScoreService _scoreService;
     [SerializeField] private TimerService _timerService;
     [SerializeField] private GameStateService _gameStateService;
-    private const float BonusSpawnChance = 0.025f; 
+
     private CellData[,] _board;
     private CellFactory _cellFactory;
     private MatchMachine _matchMachine;
     private CellMover _cellMover;
-    private readonly int[] _fillingCellsCountByColumn = new int[Config.BoardWidth];
+    private int[] _fillingCellsCountByColumn;
+    
     public Sprite[] CellSprites => _cellSprites;
- 
-    private readonly List <Cell> _updatingCells = new List<Cell>();
-    private readonly List <Cell> _deadCells = new List<Cell>();
-    private readonly List <CellFlip> _flippedCells = new List<CellFlip>();
-    private readonly List <ParticleSystem> _matchFxs = new List<ParticleSystem>();
+    public int BoardWidth => _currentLevel.boardWidth;
+    public int BoardHeight => _currentLevel.boardHeight;
+    
+    private ParticleEffectPool _matchFxPool;
+    private ParticleEffectPool _explosionFxPool;
+    private CellDestructionHandler _destructionHandler;
+    private GravitySystem _gravitySystem;
+    private CellUpdateHandler _updateHandler;
+
+    private readonly List<Cell> _updatingCells = new List<Cell>();
+    private readonly List<Cell> _deadCells = new List<Cell>();
+    private readonly List<CellFlip> _flippedCells = new List<CellFlip>();
     private void Awake()
     {
+        if (GameContext.SelectedLevel != null)
+        {
+            _currentLevel = GameContext.SelectedLevel;
+        }
+        
+        if (_currentLevel == null)
+        {
+            Debug.LogError("Уровень не выбран! Назначьте его в Инспекторе или запустите из меню.");
+            return;
+        }
+        
         _cellFactory = GetComponent<CellFactory>();
+        if (_cellFactory == null)
+        {
+            Debug.LogError("CellFactory component not found on BoardService GameObject!");
+            return;
+        }
+        _fillingCellsCountByColumn = new int[_currentLevel.boardWidth];
         _matchMachine = new MatchMachine(this);
         _cellMover = new CellMover(this);
+        
+        if (_matchFxPrefab != null)
+            _matchFxPool = new ParticleEffectPool(_matchFxPrefab, transform);
+        else
+            Debug.LogWarning("Match FX Prefab not assigned in Inspector!");
 
+        if (_bombExplosionFxPrefab != null)
+            _explosionFxPool = new ParticleEffectPool(_bombExplosionFxPrefab, transform);
+        else
+            Debug.LogWarning("Bomb Explosion FX Prefab not assigned in Inspector!");
+        
+        _destructionHandler = new CellDestructionHandler(
+            this, _matchFxPool, _explosionFxPool, _scoreService, _timerService, _deadCells);
+
+        _gravitySystem = new GravitySystem(
+            this, _cellFactory, _cellMover, _fillingCellsCountByColumn, _deadCells, _updatingCells);
+
+        _updateHandler = new CellUpdateHandler(
+            this, _matchMachine, _destructionHandler, _updatingCells, _flippedCells, _fillingCellsCountByColumn);
     }
     void Start()
     {
@@ -52,132 +93,9 @@ public class BoardService : MonoBehaviour
     private void Update()
     {
         _cellMover.Update();
-
-        var finishedUpdating = new List<Cell>();
-        foreach (var cell in _updatingCells)
-        {
-            if (!cell.UpdateCell())
-                finishedUpdating.Add(cell);
-        }
-        foreach (var cell in finishedUpdating)
-        {
-            var x = cell.Point.x;
-            _fillingCellsCountByColumn[x] = Mathf.Clamp(_fillingCellsCountByColumn[x] - 1, 0, Config.BoardWidth);
-
-            var flip = GetFlip(cell);
-            var connectedPoints = _matchMachine.GetMatchedPoints(cell.Point, true);
-            Cell flippedCell = null;
-            if(flip != null)
-            {
-                flippedCell = flip.GetOtherCell(cell);
-                MatchMachine.AddPoints(ref connectedPoints, _matchMachine.GetMatchedPoints(flippedCell.Point, true));
-            }
-            if(connectedPoints.Count == 0)
-            {
-                if(flippedCell != null)
-                    FlipCells(cell.Point, flippedCell.Point, false);
-            }
-            else
-            {
-                foreach (var connectedPoint in connectedPoints)
-                {
-                    var cellAtPoint = GetCellAtPoint(connectedPoint);
-                    var connectedCell = cellAtPoint.GetCell();
-                    
-                    // Particles FX.
-                    ParticleSystem matchFx;
-                    if (_matchFxs.Count > 0 && _matchFxs[0].isStopped)
-                    {
-                        matchFx = _matchFxs[0];
-                        _matchFxs.RemoveAt(0);
-                    }
-                    else
-                    {
-                        matchFx = Instantiate(_matchFxPrefab, transform);
-                    }
-                    _matchFxs.Add(matchFx);
-                    matchFx.Play();
-                    matchFx.transform.position = connectedCell != null ? connectedCell.rect.transform.position : Vector3.zero;
-
-                    if (connectedCell != null)
-                    {
-                        connectedCell.gameObject.SetActive(false);
-                        _deadCells.Add(connectedCell);
-                    }
-                    cellAtPoint.SetCell(null);
-                }
-                _scoreService.AddScore(connectedPoints.Count);
-                if (_timerService != null)
-                    _timerService.AddTimeOnMatch(connectedPoints.Count);
-            }
-
-            _flippedCells.Remove(flip);
-            _updatingCells.Remove(cell);
-        }
-
-        ApplyGravityToBoard();
-        
-    }
-    private void ApplyGravityToBoard()
-    {
-        for (int x = 0; x < Config.BoardWidth; x++)
-        {
-            for (int y = Config.BoardHeight - 1; y >= 0; y--)
-            {
-                var point = new Point(x, y);
-                var cellData = GetCellAtPoint(point);
-                var cellTypeAtPoint = GetCellTypeAtPoint(point);
-
-                if(cellTypeAtPoint != 0)
-                    continue;
-
-                for (int newY = y - 1; newY >= -1; newY--)
-                {
-                    var nextPoint = new Point(x, newY);
-                    var nextCellType = GetCellTypeAtPoint(nextPoint);
-                    if (nextCellType == 0)
-                        continue;
-
-                    if (nextCellType != CellData.CellType.Hole)
-                    {
-                        var cellAtPoint = GetCellAtPoint(nextPoint);
-                        var cell = cellAtPoint.GetCell();
-
-                        cellData.SetCell(cell);
-                        _updatingCells.Add(cell);
-
-                        cellAtPoint.SetCell(null);
-                    }                                        
-                    else  // Generate new cell above the board after the match.
-                    {
-                        var cellType = GetRandomCellType();
-                        var fallPoint = new Point(x, -1 - _fillingCellsCountByColumn[x]);
-                        Cell cell;
-                        if (_deadCells.Count > 0)
-                        {
-                            var revivedCell = _deadCells[0];
-                            revivedCell.gameObject.SetActive(true);
-                            cell = revivedCell;
-                            _deadCells.RemoveAt(0);
-                        }
-                        else
-                        {
-                            cell = _cellFactory.InstantiateCell();
-                        }
-
-                        cell.Initialize(new CellData(cellType, point), GetSpriteForCellType(cellType), _cellMover, this);
-                        cell.rect.anchoredPosition = GetBoardPositionFromPoint(fallPoint);
-                        
-
-                        var holeCell = GetCellAtPoint(point);
-                        holeCell.SetCell(cell);
-                        ResetCell(cell);
-                        _fillingCellsCountByColumn[x]++;
-                    }
-                    break;
-                }
-            }
-        }
+        _updateHandler.UpdateCells();
+        _destructionHandler.UpdateEffectPools();
+        _gravitySystem.ApplyGravity();
     }
     public void FlipCells(Point firstPoint, Point secondPoint, bool main)
     {
@@ -214,17 +132,6 @@ public class BoardService : MonoBehaviour
             ResetCell(firstCell);
         }
     }
-    
-    private CellFlip GetFlip(Cell cell)
-    {
-        foreach (var flip in _flippedCells)
-        {
-            if (flip.GetOtherCell(cell) != null)
-                return flip;
-        }
-        return null;
-    }
-
     public void ResetCell(Cell cell)
     {
         cell.ResetPosition();
@@ -233,102 +140,19 @@ public class BoardService : MonoBehaviour
 
     public void ExplodeBomb(Point bombPoint)
     {
-        var destroyedCount = 0;
-        var bombCellData = GetCellAtPoint(bombPoint);
-        var bombCell = bombCellData.GetCell();
-        
-        if (_bombExplosionFxPrefab != null && bombCell != null)
-        {
-            var explosionFx = Instantiate(_bombExplosionFxPrefab, transform);
-            explosionFx.transform.position = bombCell.rect.transform.position;
-            explosionFx.Play();
-        }
-        
-        for (int x = bombPoint.x - 1; x <= bombPoint.x + 1; x++)
-        {
-            for (int y = bombPoint.y - 1; y <= bombPoint.y + 1; y++)
-            {
-                var point = new Point(x, y);
-                var cellType = GetCellTypeAtPoint(point);
-                
-                if (cellType == CellData.CellType.Hole)
-                    continue;
-                
-                var cellData = GetCellAtPoint(point);
-                var cell = cellData.GetCell();
-                
-                if (cell != null)
-                {
-                    ParticleSystem matchFx;
-                    if (_matchFxs.Count > 0 && _matchFxs[0].isStopped)
-                    {
-                        matchFx = _matchFxs[0];
-                        _matchFxs.RemoveAt(0);
-                    }
-                    else
-                    {
-                        matchFx = Instantiate(_matchFxPrefab, transform);
-                    }
-                    _matchFxs.Add(matchFx);
-                    matchFx.Play();
-                    matchFx.transform.position = cell.rect.transform.position;
-                    
-                    cell.gameObject.SetActive(false);
-                    _deadCells.Add(cell);
-                    destroyedCount++;
-                }
-                
-                cellData.SetCell(null);
-            }
-        }
-        
-        _scoreService.AddScore(destroyedCount);
-        if (_timerService != null)
-            _timerService.AddTimeOnMatch(destroyedCount);
+        _destructionHandler.ExplodeBomb(bombPoint);
     }
     
     public void DestroyVerticalLine(Point bonusPoint)
     {
-        var destroyedCount = 0;
-        
-        for (int y = 0; y < Config.BoardHeight; y++)
-        {
-            var point = new Point(bonusPoint.x, y);
-            var cellType = GetCellTypeAtPoint(point);
-            
-            if (cellType == CellData.CellType.Hole )
-                continue;
-            
-            var cellData = GetCellAtPoint(point);
-            var cell = cellData.GetCell();
-            
-            if (_verticalBonusEffectFxPrefab != null && cell != null)
-            {
-                var effectFx = Instantiate(_verticalBonusEffectFxPrefab, transform);
-                effectFx.transform.position = cell.rect.transform.position;
-                effectFx.Play();
-            }
-            
-            if (cell != null)
-            {
-                cell.gameObject.SetActive(false);
-                _deadCells.Add(cell);
-                destroyedCount++;
-            }
-            
-            cellData.SetCell(null);
-        }
-        
-        _scoreService.AddScore(destroyedCount);
-        if (_timerService != null)
-            _timerService.AddTimeOnMatch(destroyedCount);
+        _destructionHandler.DestroyVerticalLine(bonusPoint);
     }
     
     private void VerifyBoardOnMathes()
     {
-        for (int y = 0; y < Config.BoardHeight; y++)
+        for (int y = 0; y < _currentLevel.boardHeight; y++)
         {
-            for (int x = 0; x < Config.BoardWidth; x++)
+            for (int x = 0; x < _currentLevel.boardWidth; x++)
             {
                 var point = new Point(x, y);
                 var cellTypeAtPoint = GetCellTypeAtPoint(point);
@@ -367,23 +191,25 @@ public class BoardService : MonoBehaviour
     }
     public CellData.CellType GetCellTypeAtPoint(Point point)
     {
-        if (point.x < 0 || point.x >= Config.BoardWidth || point.y < 0 || point.y >= Config.BoardHeight)   
+        if (point.x < 0 || point.x >= _currentLevel.boardWidth || point.y < 0 || point.y >= _currentLevel.boardHeight)   
             return CellData.CellType.Hole;   
         return _board[point.x, point.y].cellType;
     }
     
     private void InitializeBoard()
     {
-        _board = new CellData[Config.BoardWidth, Config.BoardHeight];
-        for (int y = 0; y < Config.BoardHeight; y++)
+        
+        _board = new CellData[_currentLevel.boardWidth, _currentLevel.boardHeight];
+        
+        for (int y = 0; y < _currentLevel.boardHeight; y++)
         {
-            for (int x = 0; x < Config.BoardWidth; x++)
+            for (int x = 0; x < _currentLevel.boardWidth; x++)
             {
-                _board[x, y] = new CellData(
-                    boardLayout.rows[y].row[x] ? CellData.CellType.Hole : GetRandomCellType(), 
-                    new Point(x, y)
-                );
+                var cellType = _currentLevel.boardLayout.rows[y].row[x] 
+                    ? CellData.CellType.Hole 
+                    : (CellData.CellType)(Random.Range(1, _currentLevel.availableColors + 1));
                 
+                _board[x, y] = new CellData(cellType, new Point(x, y));
             }
         }
     }
@@ -391,24 +217,16 @@ public class BoardService : MonoBehaviour
     {
         return _board[point.x, point.y];
     }
+    
+    public Vector2 GetBoardPositionFromPoint(Point point)
+    {
+        float startX = -(_currentLevel.boardWidth * Config.PieceSize) / 2f + Config.PieceSize / 2f;
+        float startY = (_currentLevel.boardHeight * Config.PieceSize) / 2f - Config.PieceSize / 2f;
 
-    private CellData.CellType GetRandomCellType()
-    {
-        float randomValue = Random.value;
-        
-        if (randomValue < BonusSpawnChance)
-        {
-            return Random.value < 0.3f ? CellData.CellType.VerticalBonus : CellData.CellType.Bomb;
-        }
-        
-        return (CellData.CellType)(Random.Range(1, _cellSprites.Length + 1));
-    }
-   
-    public static Vector2 GetBoardPositionFromPoint(Point point)
-    {
         return new Vector2(
-            Config.PieceSize/2 + Config.PieceSize * point.x, 
-            -Config.PieceSize/2 - Config.PieceSize * point.y);
+            startX + (point.x * Config.PieceSize),
+            startY - (point.y * Config.PieceSize)
+        );
     }
 
     private void OnGameOver()

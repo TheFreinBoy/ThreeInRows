@@ -1,14 +1,13 @@
-using System.Diagnostics;
 using StaticData;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
+
 
 public class CellMover
 {
     private Cell _movingCell;
     private Point _newPoint;
     private Vector2 _mouseStartPosition;
-    private BoardService _boardService;
+    private readonly BoardService _boardService;
     
     public CellMover(BoardService boardService)
     {
@@ -34,7 +33,7 @@ public class CellMover
         }
         _newPoint.Add(addPoint);
 
-        var position = BoardService.GetBoardPositionFromPoint(_movingCell.Point);
+        var position = _boardService.GetBoardPositionFromPoint(_movingCell.Point);
         if(!position.Equals(_movingCell.Point))
             position += Point.Multiply(new Point(addPoint.x, -addPoint.y), Config.PieceSize / 2).ToVector();
 

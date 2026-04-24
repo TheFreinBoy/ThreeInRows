@@ -2,92 +2,92 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class MenuManager : MonoBehaviour
+namespace UI.Menu
 {
-    [Header("UI Panels")]
-    [SerializeField] private GameObject _mainContent;   
-    [SerializeField] private GameObject _settingsPanel; 
-    [SerializeField] private GameObject _playPanel;   
-    [SerializeField] private GameObject _settingsButton;
-    [SerializeField] private GameObject _leaderBoardPanel;
-    [SerializeField] private GameObject _leaderBoardButton;
-    [SerializeField] private TMP_InputField _nameInputField;
-
-    private void Start()
+    
+    public class MenuManager : MonoBehaviour
     {
-        if (_nameInputField != null)
+        [Header("UI Panels")] [SerializeField] private GameObject _mainContent;
+        [SerializeField] private GameObject _settingsPanel;
+        [SerializeField] private GameObject _playPanel;
+        [SerializeField] private GameObject _settingsButton;
+        [SerializeField] private GameObject _leaderBoardPanel;
+        [SerializeField] private GameObject _leaderBoardButton;
+        [SerializeField] private TMP_InputField _nameInputField;
+
+        private void Start()
         {
-            string savedName = PlayerPrefs.GetString("CurrentPlayerName", "");
-            
-            if (string.IsNullOrWhiteSpace(savedName))
+            if (_nameInputField != null)
             {
-                savedName = "Player" + Random.Range(1000, 10000);
-                PlayerPrefs.SetString("CurrentPlayerName", savedName);
-                PlayerPrefs.Save();
+                string savedName = PlayerPrefs.GetString("CurrentPlayerName", "");
+
+                if (string.IsNullOrWhiteSpace(savedName))
+                {
+                    savedName = "Player" + Random.Range(1000, 10000);
+                    PlayerPrefs.SetString("CurrentPlayerName", savedName);
+                    PlayerPrefs.Save();
+                }
+
+                _nameInputField.text = savedName;
             }
-            
-            _nameInputField.text = savedName;
         }
-    }
-    
-    public void SavePlayerName(string newName)
-    {
-        if (string.IsNullOrWhiteSpace(newName))
+
+        public void SavePlayerName(string newName)
         {
-            newName = "Player" + Random.Range(1000, 10000);
-            
-            _nameInputField.text = newName; 
+            if (string.IsNullOrWhiteSpace(newName))
+            {
+                newName = "Player" + Random.Range(1000, 10000);
+
+                _nameInputField.text = newName;
+            }
+
+            PlayerPrefs.SetString("CurrentPlayerName", newName);
+            PlayerPrefs.Save();
+        }
+
+        private void CloseMainPanel()
+        {
+            _mainContent.SetActive(false);
+            _settingsPanel.SetActive(false);
+            _settingsButton.SetActive(false);
+            _leaderBoardButton.SetActive(false);
+        }
+
+        public void OpenPlayPanel()
+        {
+            CloseMainPanel();
+            _playPanel.SetActive(true);
         }
         
-        PlayerPrefs.SetString("CurrentPlayerName", newName);
-        PlayerPrefs.Save();
-    }
+        public void OpenLeaderBoardPanel()
+        {
+            CloseMainPanel();
+            _leaderBoardPanel.SetActive(true);
+        }
 
-    private void CloseMainPanel()
-    {
-        _mainContent.SetActive(false); 
-        _settingsPanel.SetActive(false); 
-        _settingsButton.SetActive(false);
-        _leaderBoardButton.SetActive(false);
-    }
-    public void OpenPlayPanel()
-    {
-        CloseMainPanel();
-        _playPanel.SetActive(true);   
-    }
+        public void ClosePlayPanel()
+        {
+            _playPanel.SetActive(false);
+            _leaderBoardPanel.SetActive(false);
+            _leaderBoardButton.SetActive(true);
+            _mainContent.SetActive(true);
+            _settingsButton.SetActive(true);
+        }
 
-    public void ArcadeButton()
-    {
-        SceneManager.LoadScene("Arcade"); 
-    }
-    public void OpenLeaderBoardPanel()
-    {
-        CloseMainPanel();
-        _leaderBoardPanel.SetActive(true);   
-    }
-    
-    public void ClosePlayPanel()
-    {
-        _playPanel.SetActive(false);   
-        _leaderBoardPanel.SetActive(false);
-        _leaderBoardButton.SetActive(true);
-        _mainContent.SetActive(true);  
-        _settingsButton.SetActive(true);
-    }
-    
-    public void ToggleSettings()
-    {
-        bool isSettingsOpen = _settingsPanel.activeSelf;
-        _settingsPanel.SetActive(!isSettingsOpen);
-        _mainContent.SetActive(isSettingsOpen);
-        
-    }
-    
-    public void ExitGame()
-    {
-        Application.Quit();
+        public void ToggleSettings()
+        {
+            bool isSettingsOpen = _settingsPanel.activeSelf;
+            _settingsPanel.SetActive(!isSettingsOpen);
+            _mainContent.SetActive(isSettingsOpen);
+
+        }
+
+        public void ExitGame()
+        {
+            Application.Quit();
 #if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
+            UnityEditor.EditorApplication.isPlaying = false;
 #endif
+        }
     }
 }

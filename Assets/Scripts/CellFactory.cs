@@ -1,6 +1,6 @@
 using UnityEngine;
 using StaticData;
-using Match3;
+
 
 public class CellFactory: MonoBehaviour
 {
@@ -12,9 +12,11 @@ public class CellFactory: MonoBehaviour
 
     public void InstantiateBoard(BoardService boardService, CellMover cellMover)
     {
-         for (int y = 0; y < Config.BoardHeight; y++)
+        _boardService = boardService;
+        
+        for (int y = 0; y < boardService.BoardHeight; y++) 
         {
-            for (int x = 0; x < Config.BoardWidth; x++)
+            for (int x = 0; x < boardService.BoardWidth; x++)
             {       
                 var point = new Point(x, y);
                 var cellData = boardService.GetCellAtPoint(point);    
@@ -24,12 +26,12 @@ public class CellFactory: MonoBehaviour
                     continue;
                 
                 var cell = InstantiateCell();
-                cell.rect.anchoredPosition = BoardService.GetBoardPositionFromPoint(point);
+                cell.rect.anchoredPosition = _boardService.GetBoardPositionFromPoint(point);
                 var sprite = boardService.GetSpriteForCellType(cellType);
                 cell.Initialize(new CellData(cellType, new Point(x,y)), sprite, cellMover, boardService);
                 cellData.SetCell(cell);
-            }
-        }
+            } 
+         }
     }
     
 

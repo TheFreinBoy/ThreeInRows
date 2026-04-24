@@ -39,7 +39,7 @@ public class TimerService : MonoBehaviour
         UpdateTimerDisplay();
     }
 
-    public void AddTime(float amount)
+    private void AddTime(float amount)
     {
         _remainingTime += amount;
         UpdateTimerDisplay();

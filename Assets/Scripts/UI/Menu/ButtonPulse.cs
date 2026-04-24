@@ -1,20 +1,24 @@
 using UnityEngine;
-using DG.Tweening; 
+using DG.Tweening;
 
-public class ButtonPulse : MonoBehaviour
+namespace UI.Menu
 {
-    [Header("Настройки анимации")]
-    [SerializeField] private float _targetScale = 1.1f; 
-    [SerializeField] private float _duration = 1f;     
-
-    private void Start()
+       public class ButtonPulse : MonoBehaviour
     {
+        [Header("Настройки анимации")] [SerializeField]
+        private float _targetScale = 1.1f;
 
-        transform.DOScale(_targetScale, _duration).SetLoops(-1, LoopType.Yoyo);
-    }
+        [SerializeField] private float _duration = 1f;
 
-    private void OnDestroy()
-    {
-        transform.DOKill();
+        private void Start()
+        {
+
+            transform.DOScale(_targetScale, _duration).SetLoops(-1, LoopType.Yoyo);
+        }
+
+        private void OnDestroy()
+        {
+            transform.DOKill();
+        }
     }
 }

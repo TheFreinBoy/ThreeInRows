@@ -2,25 +2,28 @@ using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
 
-public class LeaderboardUI : MonoBehaviour
+namespace UI.Menu
 {
-    [SerializeField] private TMP_Text _leaderboardText; 
-    
-    private void OnEnable()
+    public class LeaderboardUI : MonoBehaviour
     {
-        List<Leaderboard.PlayerScore> topScores = Leaderboard.GetScores();
+        [SerializeField] private TMP_Text _leaderboardText;
 
-        _leaderboardText.text = "Leaderboard:\n\n";
-
-        if (topScores.Count == 0)
+        private void OnEnable()
         {
-            _leaderboardText.text += "there are no records yet";
-            return;
-        }
+            List<Leaderboard.PlayerScore> topScores = Leaderboard.GetScores();
 
-        for (int i = 0; i < topScores.Count; i++)
-        {
-            _leaderboardText.text += $"{i + 1}. {topScores[i].playerName}: {topScores[i].score}\n";
+            _leaderboardText.text = "Leaderboard:\n\n";
+
+            if (topScores.Count == 0)
+            {
+                _leaderboardText.text += "there are no records yet";
+                return;
+            }
+
+            for (int i = 0; i < topScores.Count; i++)
+            {
+                _leaderboardText.text += $"{i + 1}. {topScores[i].playerName}: {topScores[i].score}\n";
+            }
         }
     }
 }

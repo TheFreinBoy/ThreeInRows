@@ -1,22 +1,25 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MenuBackgroundScroll : MonoBehaviour
+namespace UI.Menu
 {
-    [SerializeField] private RawImage _backgroundImage;
-    [SerializeField] private float _speedX = 0.05f;
-    [SerializeField] private float _speedY = 0.05f;
-
-    private void Update()
+    public class MenuBackgroundScroll : MonoBehaviour
     {
-        if (_backgroundImage != null)
+        [SerializeField] private RawImage _backgroundImage;
+        [SerializeField] private float _speedX = 0.05f;
+        [SerializeField] private float _speedY = 0.05f;
+
+        private void Update()
         {
-            Rect uvRect = _backgroundImage.uvRect;
-            
-            uvRect.x += _speedX * Time.deltaTime;
-            uvRect.y += _speedY * Time.deltaTime;
-            
-            _backgroundImage.uvRect = uvRect;
+            if (_backgroundImage != null)
+            {
+                Rect uvRect = _backgroundImage.uvRect;
+
+                uvRect.x += _speedX * Time.deltaTime;
+                uvRect.y += _speedY * Time.deltaTime;
+
+                _backgroundImage.uvRect = uvRect;
+            }
         }
     }
 }

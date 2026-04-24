@@ -1,19 +1,22 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class Manager : MonoBehaviour
+namespace UI
 {
-    
-    public void RetryGame()
-    {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-    }
-    
-    public void ExitToMenu()
+    public class Manager : MonoBehaviour
     {
 
-        
-        SceneManager.LoadScene("MainMenu"); 
-    }
+        public void RetryGame()
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
 
+        public void ExitToMenu()
+        {
+
+
+            SceneManager.LoadScene("MainMenu");
+        }
+
+    }
 }
