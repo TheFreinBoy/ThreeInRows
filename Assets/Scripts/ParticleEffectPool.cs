@@ -21,7 +21,7 @@ public class ParticleEffectPool
     /// <summary>
     /// Get an effect from the pool or create a new one
     /// </summary>
-    public ParticleSystem GetEffect()
+    private ParticleSystem GetEffect()
     {
         ParticleSystem effect;
 
@@ -52,7 +52,7 @@ public class ParticleEffectPool
     /// <summary>
     /// Return an effect to the pool (called when the effect finishes)
     /// </summary>
-    public void ReturnEffect(ParticleSystem effect)
+    private void ReturnEffect(ParticleSystem effect)
     {
         if (_activeEffects.Contains(effect))
         {

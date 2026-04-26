@@ -1,5 +1,4 @@
 using UnityEngine;
-using StaticData;
 
 
 public class CellFactory: MonoBehaviour
@@ -31,7 +30,7 @@ public class CellFactory: MonoBehaviour
                 cell.Initialize(new CellData(cellType, new Point(x,y)), sprite, cellMover, boardService);
                 cellData.SetCell(cell);
             } 
-         }
+        }
     }
     
 

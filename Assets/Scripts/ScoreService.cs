@@ -7,11 +7,9 @@ public class ScoreService : MonoBehaviour
 {
     [SerializeField] private TMP_Text _scoreText;    
     
-    [Header("Тексты финала (перетащи из панелей!)")]
-    [SerializeField] private TMP_Text _winFinalScoreText;   // Текст из панели Победы
-    [SerializeField] private TMP_Text _loseFinalScoreText;  // Текст из панели Поражения
+    [SerializeField] private TMP_Text _winFinalScoreText;   
+    [SerializeField] private TMP_Text _loseFinalScoreText;  
     
-    [Header("Сервисы")]
     [SerializeField] private GameStateService _gameState; 
 
     private int _currentScore;
@@ -28,7 +26,6 @@ public class ScoreService : MonoBehaviour
     {
         if (_gameState != null)
         {
-            // Подписываемся на ОБА исхода игры
             _gameState.OnGameOver += UpdateLoseScore;
             _gameState.OnLevelWon += UpdateWinScore;
         }
@@ -38,7 +35,6 @@ public class ScoreService : MonoBehaviour
     {
         if (_gameState != null)
         {
-            // Отписываемся от обоих
             _gameState.OnGameOver -= UpdateLoseScore;
             _gameState.OnLevelWon -= UpdateWinScore;
         }
@@ -75,8 +71,7 @@ public class ScoreService : MonoBehaviour
                 _scoreText.text = _currentScore.ToString();
         }
     }
-
-    // --- МЕТОДЫ ДЛЯ ФИНАЛА ---
+    
     private void UpdateLoseScore() => AnimateFinalScore(_loseFinalScoreText);
     private void UpdateWinScore() => AnimateFinalScore(_winFinalScoreText);
 
@@ -88,8 +83,7 @@ public class ScoreService : MonoBehaviour
         if (targetText != null)
         {
             targetText.text = "0";
-
-            // .SetUpdate(true) заставляет DOTween работать даже если игра на паузе!
+            
             DOVirtual.Int(0, _currentScore, 1.5f, (currentValue) =>
             {
                 targetText.text = currentValue.ToString();

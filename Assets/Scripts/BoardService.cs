@@ -53,7 +53,6 @@ public class BoardService : MonoBehaviour
         _cellFactory = GetComponent<CellFactory>();
         if (_cellFactory == null)
         {
-            Debug.LogError("CellFactory component not found on BoardService GameObject!");
             return;
         }
         _fillingCellsCountByColumn = new int[_currentLevel.boardWidth];
@@ -62,13 +61,11 @@ public class BoardService : MonoBehaviour
         
         if (_matchFxPrefab != null)
             _matchFxPool = new ParticleEffectPool(_matchFxPrefab, transform);
-        else
-            Debug.LogWarning("Match FX Prefab not assigned in Inspector!");
+
 
         if (_bombExplosionFxPrefab != null)
             _explosionFxPool = new ParticleEffectPool(_bombExplosionFxPrefab, transform);
-        else
-            Debug.LogWarning("Bomb Explosion FX Prefab not assigned in Inspector!");
+
         
         _destructionHandler = new CellDestructionHandler(
             this, _matchFxPool, _explosionFxPool, _scoreService, _timerService, _deadCells);
@@ -82,7 +79,7 @@ public class BoardService : MonoBehaviour
     void Start()
     {
         InitializeBoard();
-        VerifyBoardOnMathes();
+        VerifyBoardOnMatches();
         _cellFactory.InstantiateBoard(this, _cellMover);
         
         if (_timerService != null)
@@ -157,7 +154,7 @@ public class BoardService : MonoBehaviour
         _destructionHandler.DestroyVerticalLine(bonusPoint);
     }
     
-    private void VerifyBoardOnMathes()
+    private void VerifyBoardOnMatches()
     {
         for (int y = 0; y < _currentLevel.boardHeight; y++)
         {

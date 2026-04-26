@@ -12,7 +12,7 @@ public class Cell : MonoBehaviour , IPointerDownHandler , IPointerUpHandler
    private BoardService _boardService;
    [SerializeField] private float _moveSpeed = 10f;
    private Vector2 _position;
-   private bool _isUdating;
+   private bool _isUpdating;
     private void Start()
     {
         _position = rect.anchoredPosition;
@@ -31,14 +31,14 @@ public class Cell : MonoBehaviour , IPointerDownHandler , IPointerUpHandler
         if(Vector3.Distance(rect.anchoredPosition, _position) > 1)
         {
             MoveToPosition(_position);
-            _isUdating = true;
+            _isUpdating = true;
         }
         else
         {
             rect.anchoredPosition = _position;
-            _isUdating = false;          
+            _isUpdating = false;          
         }
-        return _isUdating;   
+        return _isUpdating;   
     }
    private void UpdateName()
         => transform.name = $"Cell [{Point.x}, {Point.y}]";

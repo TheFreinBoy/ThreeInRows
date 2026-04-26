@@ -51,12 +51,10 @@ public class GravitySystem
     {
         var point = new Point(x, y);
         var cellTypeAtPoint = _boardService.GetCellTypeAtPoint(point);
-
-        // Если клетка не пуста, продолжаем
+        
         if (cellTypeAtPoint != 0)
             return;
-
-        // Ищем следующую непустую клетку снизу
+        
         for (int newY = y - 1; newY >= -1; newY--)
         {
             var nextPoint = new Point(x, newY);
@@ -67,12 +65,10 @@ public class GravitySystem
 
             if (nextCellType != CellData.CellType.Hole)
             {
-                // Переместить клетку на пустое место
                 MoveCell(nextPoint, point);
             }
             else
             {
-                // Если под пустым местом дыра, создаём новую клетку
                 CreateNewCell(x, point);
             }
 
