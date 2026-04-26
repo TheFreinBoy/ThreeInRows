@@ -1,1 +1,1 @@
-.apk ---> ThreeInRows/Apk/.apk
+.apk ---> ThreeInRows/Apk/Match3.apk
