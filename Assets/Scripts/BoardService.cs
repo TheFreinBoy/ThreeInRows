@@ -38,6 +38,8 @@ public class BoardService : MonoBehaviour
     private readonly List<CellFlip> _flippedCells = new List<CellFlip>();
     private void Awake()
     {
+        Application.targetFrameRate = 60;
+        Screen.sleepTimeout = SleepTimeout.NeverSleep;
         if (GameContext.SelectedLevel != null)
         {
             _currentLevel = GameContext.SelectedLevel;
