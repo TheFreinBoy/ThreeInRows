@@ -133,7 +133,7 @@ public class CellDestructionHandler
         {
             if (fxPool != null)
                 fxPool.PlayEffectAt(cell.rect.transform.position);
-
+            SoundManager.Instance.PlayMatchSound();
             cell.gameObject.SetActive(false);
             _deadCells.Add(cell);
         }

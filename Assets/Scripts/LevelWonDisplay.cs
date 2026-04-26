@@ -47,6 +47,7 @@ public class LevelWonDisplay : MonoBehaviour
         {
             pauseManager.SetPauseEnabled(false);
             _winPanel.SetActive(true); 
+            SoundManager.Instance.PlayWinSound();
             _winPanel.transform.localScale = Vector3.zero;
             
             _winPanel.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutBack);

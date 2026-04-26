@@ -48,6 +48,7 @@ public class GameOverDisplay : MonoBehaviour
         {
             pauseManager.SetPauseEnabled(false);
             _endGamePanel.SetActive(true); 
+            SoundManager.Instance.PlayLoseSound();
         }
         _endGamePanel.transform.localScale = Vector3.zero;
         
