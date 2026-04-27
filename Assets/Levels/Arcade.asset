@@ -13,9 +13,11 @@ MonoBehaviour:
   m_Name: Arcade
   m_EditorClassIdentifier: Assembly-CSharp::LevelData
   boardWidth: 16
-  boardHeight: 7
+  boardHeight: 9
   boardLayout:
     rows:
+    - row: 00000000000000000000000000000000
+    - row: 00000000000000000000000000000000
     - row: 00000000000000000000000000000000
     - row: 00000000000000000000000000000000
     - row: 00000000000000000000000000000000

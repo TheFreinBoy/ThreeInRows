@@ -5,9 +5,7 @@ namespace UI.Menu
 {
        public class ButtonPulse : MonoBehaviour
     {
-        [Header("Настройки анимации")] [SerializeField]
-        private float _targetScale = 1.1f;
-
+        [SerializeField] private float _targetScale = 1.1f;
         [SerializeField] private float _duration = 1f;
 
         private void Start()

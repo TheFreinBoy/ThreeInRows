@@ -5,8 +5,8 @@ namespace UI.Menu
 {
     public class LevelButton : MonoBehaviour
     {
-        [SerializeField] private LevelData _levelToLoad; // Перетащи сюда файл Level_1 или Level_2
-        [SerializeField] private string _gameSceneName = "Arcade"; // Имя твоей игровой сцены
+        [SerializeField] private LevelData _levelToLoad; 
+        [SerializeField] private string _gameSceneName = "Arcade"; 
         
         public void LoadLevel()
         {
