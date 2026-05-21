@@ -1,5 +1,4 @@
 using UnityEngine;
-using StaticData;
 
 /// <summary>
 /// Manages gravity on the board

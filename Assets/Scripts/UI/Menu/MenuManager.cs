@@ -10,6 +10,7 @@ namespace UI.Menu
         [SerializeField] private GameObject _playPanel;
         [SerializeField] private GameObject _levelPanel;
         [SerializeField] private GameObject _leaderBoardPanel;
+        [SerializeField] private GameObject _multiplayerPanel;
         
         [SerializeField] private GameObject _settingsButton;
         [SerializeField] private GameObject _leaderBoardButton;
@@ -70,6 +71,19 @@ namespace UI.Menu
             ClosePlayPanel();
             CloseMainPanel();
             _levelPanel.SetActive(true);
+        }
+
+        public void OpenMultiplayerPanel()
+        {
+            ClosePlayPanel();
+            CloseMainPanel();
+            _multiplayerPanel.SetActive(true);
+        }
+
+        public void CloseMultiplayerPanel()
+        {
+            _multiplayerPanel.SetActive(false);
+            OpenPlayPanel();
         }
 
         public void CloseLevelPanel()
