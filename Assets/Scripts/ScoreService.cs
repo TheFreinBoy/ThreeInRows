@@ -2,6 +2,7 @@ using DG.Tweening;
 using UnityEngine;
 using TMPro;
 using UI.Menu;
+using Multiplayer;
 
 public class ScoreService : MonoBehaviour
 {
@@ -44,6 +45,16 @@ public class ScoreService : MonoBehaviour
     {
         _currentScore += score;
         UpdateScoreDisplay();
+        
+        var networkPlayers = FindObjectsByType<PlayerState>(FindObjectsSortMode.None);
+        foreach (var player in networkPlayers)
+        {
+            if (player.HasStateAuthority)
+            {
+                player.AddPoints(score);
+                break;
+            }
+        }
         
         if (_currentScore >= _targetScore && _targetScore > 0)
         {

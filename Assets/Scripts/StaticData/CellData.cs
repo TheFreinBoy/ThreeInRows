@@ -17,10 +17,13 @@ public class CellData
     public CellType cellType;
     public Point point;
     private Cell _cell;
-    public CellData(CellType cellType, Point point)
+    
+    private BoardService _boardService;
+    public CellData(CellType cellType, Point point, BoardService boardService)
     {
         this.cellType = cellType;
         this.point = point;
+        this._boardService = boardService;
     }
     public Cell GetCell()
     {
@@ -37,6 +40,11 @@ public class CellData
         {
             cellType = newCell.CellType;
             _cell.SetCellPoint(point);
+        }
+        
+        if (_boardService != null)
+        {
+            _boardService.SendCellToNetwork(point.x, point.y, cellType);
         }
     }
 

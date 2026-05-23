@@ -6,10 +6,9 @@ namespace Multiplayer
 {
     public class MultiplayerMenu : MonoBehaviour
     {
-        public NetworkObject playerPrefab;
         public NetworkRunner runnerPrefab;
         public TMP_InputField roomInput;
-        
+        public int gameSceneIndex = 1;
         private NetworkRunner _runner;
 
         public async void ConnectToRoom()
@@ -34,13 +33,14 @@ namespace Multiplayer
             {
                 GameMode = GameMode.Shared,
                 SessionName = roomInput.text,
-                SceneManager = sceneManager
+                SceneManager = sceneManager,
+                
+                Scene = SceneRef.FromIndex(gameSceneIndex)
             });
 
             if (result.Ok)
             {
                 Debug.Log("<color=green> Access!</color>");
-                _runner.Spawn(playerPrefab, Vector3.zero, Quaternion.identity, _runner.LocalPlayer);
             }
             else
             {

@@ -24,6 +24,9 @@ EditorBuildSettings:
     path: Assets/Scenes/MainMenu.unity
     guid: 994bdf4f7ea4e074e961283d5e9361f7
   - enabled: 1
+    path: Assets/Scenes/MultiplayerArena.unity
+    guid: 9ef3a107a5964514cb8f3348f1397cc2
+  - enabled: 1
     path: Assets/Scenes/Arcade.unity
     guid: 2e629f2a6d2c33b428732f4e07dd0b12
   m_configObjects: {}

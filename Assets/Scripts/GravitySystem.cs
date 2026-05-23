@@ -112,7 +112,7 @@ public class GravitySystem
         }
 
         cell.Initialize(
-            new CellData(cellType, holePoint),
+            new CellData(cellType, holePoint, _boardService),
             _boardService.GetSpriteForCellType(cellType),
             _cellMover,
             _boardService);

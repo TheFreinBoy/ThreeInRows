@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using StaticData;
 using UnityEngine;
 using Random = UnityEngine.Random;
+using Multiplayer;
+using Fusion;
 
 [RequireComponent(typeof(CellFactory))]
 public class BoardService : MonoBehaviour
@@ -22,6 +24,8 @@ public class BoardService : MonoBehaviour
     private MatchMachine _matchMachine;
     private CellMover _cellMover;
     private int[] _fillingCellsCountByColumn;
+    private bool _isMatchStarted;
+    private bool _isInitialBoardSynced;
     
     public Sprite[] CellSprites => _cellSprites;
     public int BoardWidth => _currentLevel.boardWidth;
@@ -76,10 +80,20 @@ public class BoardService : MonoBehaviour
         _updateHandler = new CellUpdateHandler(
             this, _matchMachine, _destructionHandler, _updatingCells, _flippedCells, _fillingCellsCountByColumn);
     }
-    void Start()
+    private void Start()
     {
+        var arenaManager = FindFirstObjectByType<ArenaManager>();
+        
+        if (arenaManager == null)
+            StartMatch();
+    }
+    public void StartMatch()
+    {
+        _isMatchStarted = true;
+        
         InitializeBoard();
         VerifyBoardOnMatches();
+        
         _cellFactory.InstantiateBoard(this, _cellMover);
         
         if (_timerService != null)
@@ -98,6 +112,21 @@ public class BoardService : MonoBehaviour
     }
     private void Update()
     {
+        if (!_isMatchStarted) return;
+
+        if (!_isInitialBoardSynced)
+        {
+            var runner = FindFirstObjectByType<NetworkRunner>();
+        
+            if (runner == null || !runner.IsRunning)
+            {
+                _isInitialBoardSynced = true;
+            }
+            else
+            {
+                SyncInitialBoard();
+            }
+        }
         _cellMover.Update();
         _updateHandler.UpdateCells();
         _destructionHandler.UpdateEffectPools();
@@ -182,6 +211,8 @@ public class BoardService : MonoBehaviour
     private void SetCellTypeAtPoint(Point point, CellData.CellType newCellType)
     {
         _board[point.x, point.y].cellType = newCellType;
+        
+        SendCellToNetwork(point.x, point.y, newCellType);
     }
     private CellData.CellType GetNewCellType(ref List<CellData.CellType> removeCellTypes)
     {
@@ -215,7 +246,7 @@ public class BoardService : MonoBehaviour
                     ? CellData.CellType.Hole 
                     : (CellData.CellType)(Random.Range(1, 7));
                 
-                _board[x, y] = new CellData(cellType, new Point(x, y));
+                _board[x, y] = new CellData(cellType, new Point(x, y),this);
             }
         }
     }
@@ -259,5 +290,49 @@ public class BoardService : MonoBehaviour
             return false;
         
         return _flippedCells.Count == 0 && _updatingCells.Count == 0;
+    }
+    
+    // Network
+    public void SendCellToNetwork(int x, int y, CellData.CellType type)
+    {
+        var runner = FindFirstObjectByType<NetworkRunner>();
+        if (runner == null || !runner.IsRunning) return;
+        
+        var networkBoards = FindObjectsByType<NetworkBoardState>(FindObjectsSortMode.None);
+        foreach (var netBoard in networkBoards)
+        {
+            if (netBoard.HasStateAuthority)
+            {
+                int typeValue = (int)type;
+                netBoard.UpdateCell(x, y, _currentLevel.boardWidth, _currentLevel.boardHeight, typeValue);
+                break;
+            }
+        }
+    }
+    private void SyncInitialBoard()
+    {
+        var networkBoards = FindObjectsByType<NetworkBoardState>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        bool isAvatarReady = false;
+
+        foreach (var netBoard in networkBoards)
+        {
+            if (netBoard.HasStateAuthority)
+            {
+                isAvatarReady = true;
+                break;
+            }
+        }
+        
+        if (!isAvatarReady) return;
+        
+        for (int y = 0; y < BoardHeight; y++)
+        {
+            for (int x = 0; x < BoardWidth; x++)
+            {
+                var type = GetCellTypeAtPoint(new Point(x, y));
+                SendCellToNetwork(x, y, type);
+            }
+        }
+        _isInitialBoardSynced = true;
     }
 }
