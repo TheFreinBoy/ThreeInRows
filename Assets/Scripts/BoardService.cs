@@ -109,6 +109,12 @@ public class BoardService : MonoBehaviour
 
         if (_gameStateService != null)
             _gameStateService.Initialize();
+        
+        var netTimer = FindFirstObjectByType<Multiplayer.NetworkTimerService>();
+        if (netTimer != null) 
+        {
+            netTimer.StartTimer();
+        }
     }
     private void Update()
     {

@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using TMPro;
+using Fusion;
 
 public class TimerService : MonoBehaviour
 {
@@ -16,18 +17,21 @@ public class TimerService : MonoBehaviour
     
     public void Initialize(float time)
     {
+        var runner = FindFirstObjectByType<NetworkRunner>();
+        bool isMultiplayer = runner != null && runner.IsRunning;
+
+        if (isMultiplayer)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
+        
+        gameObject.SetActive(true);
         _remainingTime = time;
         _isRunning = true;
         UpdateTimerDisplay();
     }
-
-    void Start()
-    {
-        _remainingTime = _initialTime;
-        _isRunning = true;
-        UpdateTimerDisplay();
-    }
-
+    
     void Update()
     {
         if (!_isRunning)
@@ -62,17 +66,6 @@ public class TimerService : MonoBehaviour
         int seconds = Mathf.FloorToInt(_remainingTime % 60f);
         _timerText.text = $"{minutes:00}:{seconds:00}";
     }
-
-    public void ResetTimer()
-    {
-        _remainingTime = _initialTime;
-        _isRunning = true;
-        UpdateTimerDisplay();
-    }
-
-    public void StopTimer()
-    {
-        _isRunning = false;
-    }
+    
 }
 
