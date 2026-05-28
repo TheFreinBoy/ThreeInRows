@@ -13,7 +13,6 @@ public class TimerService : MonoBehaviour
     private bool _isRunning;
     
     public event Action OnTimeExpired;
-
     
     public void Initialize(float time)
     {

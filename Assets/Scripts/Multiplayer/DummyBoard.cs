@@ -1,5 +1,4 @@
-﻿using Fusion;
-using DG.Tweening;
+﻿using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,14 +10,19 @@ namespace Multiplayer
         [SerializeField] private GameObject _dummyCellPrefab; 
         
         private NetworkBoardState _enemyState;
+        
         private GameObject[] _dummyCells;
+        private SpriteRenderer[] _dummyRenderers; 
+        private Image[] _dummyImages;            
         private int[] _previousBoardData; 
-        private bool _isInitialized = false;
+        
+        private bool _isInitialized;
 
         void Update()
         {
-            if (_enemyState == null)
+            if (_enemyState == null || _enemyState.Object == null || !_enemyState.Object.IsValid)
             {
+                _enemyState = null;
                 foreach (var state in FindObjectsByType<NetworkBoardState>(FindObjectsInactive.Include, FindObjectsSortMode.None))
                 {
                     if (!state.HasStateAuthority) 
@@ -39,7 +43,7 @@ namespace Multiplayer
             {
                 CreateGrid(width, height); 
             }
-
+            
             if (_isInitialized)
             {
                 SyncVisualsWithAnimation(width, height);
@@ -48,8 +52,11 @@ namespace Multiplayer
 
         private void CreateGrid(int width, int height)
         {
-            _dummyCells = new GameObject[width * height];
-            _previousBoardData = new int[width * height];
+            int totalCells = width * height;
+            _dummyCells = new GameObject[totalCells];
+            _dummyRenderers = new SpriteRenderer[totalCells];
+            _dummyImages = new Image[totalCells];
+            _previousBoardData = new int[totalCells];
 
             for (int y = 0; y < height; y++)
             {
@@ -60,16 +67,12 @@ namespace Multiplayer
                     Vector2 localPos = _mainBoard.GetBoardPositionFromPoint(new Point(x, y));
                     cellObj.transform.localPosition = localPos;
                     
-                    var cellScript = cellObj.GetComponent<Cell>();
-                    if (cellScript != null) Destroy(cellScript);
-
-                    var button = cellObj.GetComponent<UnityEngine.UI.Button>();
-                    if (button != null) Destroy(button);
-
-                    var collider = cellObj.GetComponent<Collider2D>();
-                    if (collider != null) Destroy(collider);
-
-                    _dummyCells[y * width + x] = cellObj;
+                    int index = y * width + x;
+                    _dummyCells[index] = cellObj;
+                    
+                    _dummyRenderers[index] = cellObj.GetComponent<SpriteRenderer>();
+                    _dummyImages[index] = cellObj.GetComponent<Image>();
+                    
                 }
             }
             _isInitialized = true;
@@ -82,27 +85,25 @@ namespace Multiplayer
                 for (int x = 0; x < width; x++)
                 {
                     int index = y * width + x;
-                    
                     int currentCellValue = _enemyState.BoardData.Get(index);
                     
                     if (currentCellValue != _previousBoardData[index])
                     {
-                        AnimateCellChange(x, y, width, currentCellValue, _previousBoardData[index]);
-                        
+                        AnimateCellChange(x, y, currentCellValue,  index);
                         _previousBoardData[index] = currentCellValue;
                     }
                 }
             }
         }
 
-        private void AnimateCellChange(int x, int y, int width, int newValue, int oldValue)
+
+        private void AnimateCellChange(int x, int y, int newValue,  int index)
         {
-            int index = y * width + x;
             GameObject cellObj = _dummyCells[index];
             Sprite newSprite = _mainBoard.GetSpriteForCellType((CellData.CellType)newValue);
             
-            SpriteRenderer spriteRenderer = cellObj.GetComponent<SpriteRenderer>();
-            Image image = cellObj.GetComponent<Image>();
+            SpriteRenderer spriteRenderer = _dummyRenderers[index];
+            Image image = _dummyImages[index];
             
             if (newValue <= 0)
             {
@@ -117,7 +118,6 @@ namespace Multiplayer
                 SetComponentSprite(spriteRenderer, image, newSprite);
                 
                 Vector3 targetLocalPos = _mainBoard.GetBoardPositionFromPoint(new Point(x, y));
-                
                 float offset = 0.6f; 
                 cellObj.transform.localPosition = new Vector3(targetLocalPos.x, targetLocalPos.y + offset, targetLocalPos.z);
                 

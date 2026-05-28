@@ -3,6 +3,7 @@ using UnityEngine;
 using TMPro;
 using UI.Menu;
 using Multiplayer;
+using Fusion;
 
 public class ScoreService : MonoBehaviour
 {
@@ -46,13 +47,17 @@ public class ScoreService : MonoBehaviour
         _currentScore += score;
         UpdateScoreDisplay();
         
-        var networkPlayers = FindObjectsByType<PlayerState>(FindObjectsSortMode.None);
-        foreach (var player in networkPlayers)
+        var runner = FindFirstObjectByType<NetworkRunner>();
+        if (runner != null && runner.IsRunning)
         {
-            if (player.HasStateAuthority)
+            var networkPlayers = FindObjectsByType<PlayerState>(FindObjectsSortMode.None);
+            foreach (var player in networkPlayers)
             {
-                player.AddPoints(score);
-                break;
+                if (player.HasStateAuthority)
+                {
+                    player.AddPoints(score);
+                    break;
+                }
             }
         }
         
