@@ -26,6 +26,8 @@ public class BoardService : MonoBehaviour
     private int[] _fillingCellsCountByColumn;
     private bool _isMatchStarted;
     private bool _isInitialBoardSynced;
+    private bool _isMultiplayerActive; 
+    private NetworkBoardState _localNetworkBoard;
     
     public Sprite[] CellSprites => _cellSprites;
     public int BoardWidth => _currentLevel.boardWidth;
@@ -89,6 +91,9 @@ public class BoardService : MonoBehaviour
     }
     public void StartMatch()
     {
+        var runner = FindFirstObjectByType<NetworkRunner>();
+        _isMultiplayerActive = runner != null && runner.IsRunning;
+        
         _isMatchStarted = true;
         
         InitializeBoard();
@@ -122,9 +127,7 @@ public class BoardService : MonoBehaviour
 
         if (!_isInitialBoardSynced)
         {
-            var runner = FindFirstObjectByType<NetworkRunner>();
-        
-            if (runner == null || !runner.IsRunning)
+            if (!_isMultiplayerActive)
             {
                 _isInitialBoardSynced = true;
             }
@@ -301,18 +304,25 @@ public class BoardService : MonoBehaviour
     // Network
     public void SendCellToNetwork(int x, int y, CellData.CellType type)
     {
-        var runner = FindFirstObjectByType<NetworkRunner>();
-        if (runner == null || !runner.IsRunning) return;
+        if (!_isMultiplayerActive) return;
         
-        var networkBoards = FindObjectsByType<NetworkBoardState>(FindObjectsSortMode.None);
-        foreach (var netBoard in networkBoards)
+        if (_localNetworkBoard == null)
         {
-            if (netBoard.HasStateAuthority)
+            var networkBoards = FindObjectsByType<NetworkBoardState>(FindObjectsSortMode.None);
+            foreach (var netBoard in networkBoards)
             {
-                int typeValue = (int)type;
-                netBoard.UpdateCell(x, y, _currentLevel.boardWidth, _currentLevel.boardHeight, typeValue);
-                break;
+                if (netBoard.HasStateAuthority)
+                {
+                    _localNetworkBoard = netBoard;
+                    break;
+                }
             }
+        }
+        
+        if (_localNetworkBoard != null)
+        {
+            int typeValue = (int)type;
+            _localNetworkBoard.UpdateCell(x, y, _currentLevel.boardWidth, _currentLevel.boardHeight, typeValue);
         }
     }
     private void SyncInitialBoard()
