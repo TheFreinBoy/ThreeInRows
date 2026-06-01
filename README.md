@@ -1,4 +1,46 @@
-.apk ---> ThreeInRows/Apk/Match3.apk 
+<div align="center">
 
-Доп завдання:
-Assets/Scripts/Useful
+# 💎 Match-3 Multiplayer Arena
+
+**A real-time competitive Match-3 game built with Unity and Photon Fusion.**
+
+[![Unity](https://img.shields.io/badge/Unity-2022.3%2B-black?style=for-the-badge&logo=unity)](https://unity.com/)
+[![Photon Fusion](https://img.shields.io/badge/Photon_Fusion-Shared_Mode-blue?style=for-the-badge)](https://doc.photonengine.com/fusion/current/getting-started/fusion-intro)
+[![C#](https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=c-sharp&logoColor=white)](#)
+[![DOTween](https://img.shields.io/badge/DOTween-Pro-brightgreen?style=for-the-badge)](#)
+
+</div>
+
+<br/>
+
+## 📖 About The Project
+
+This project is a networked competitive Match-3 game designed to demonstrate a deep understanding of **client-server architecture**, **real-time state synchronization**, and **clean code principles**. 
+
+Built entirely in C# using Unity and Photon Fusion (Shared Mode), it features secure authoritative logic, robust session management, and highly optimized UI animations.
+
+## ✨ Key Features
+
+* ⚔️ **Real-time Multiplayer:** Direct player connection via a custom room-based lobby.
+* 🛡️ **Cheat Prevention (State Authority):** Scores, timers, and end-game logic are strictly controlled by the State Authority. Clients cannot manipulate opponent data.
+* 🚀 **Offline Fallback:** The architecture gracefully falls back to local single-player mode if the network is disconnected, allowing for easy offline testing.
+* 🎭 **Asynchronous Enemy Board:** Utilizes a "Dummy Board" pattern. The opponent's board runs zero gameplay logic and acts strictly as a lightweight listener for network state changes.
+* 🧹 **Robust Lifecycle Management:** Prevents "zombie sessions" (lingering `NetworkRunner` instances) and handles sudden disconnects safely without throwing `NullReferenceExceptions`.
+
+---
+
+## 🛠 Under the Hood (Architecture)
+
+The codebase is highly modular, utilizing strict separation of concerns to keep the project scalable:
+
+* `BoardService` — The core facade. Manages grid initialization, move validation, and sends state updates to the network.
+* `MatchMachine` & `GravitySystem` — Encapsulated mathematical systems for detecting complex matches (L-shapes, cross-shapes) and calculating cell fall trajectories.
+* `NetworkTimerService` — Ensures exact time synchronization across the network. Automatically handles end-game logic and winner determination.
+* `NetworkDisconnectObserver` — A monitoring system that detects unexpected opponent drops and awards a technical victory to the remaining player.
+
+⏱️ Estimation & Time Tracking
+
+To maintain a structured development process, feature estimations, bug fixes, and network synchronization tasks were planned and tracked externally. The total estimated time for this project is ~32 hours.
+📊 [**View Detailed Estimation Tracker on Google Sheets**](https://docs.google.com/spreadsheets/d/1wObyJkTYyLdL5nhzleQBVyJh4kq5mrFOmAjm4NwGSiw/edit?usp=sharing)
+
+
