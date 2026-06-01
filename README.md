@@ -1,6 +1,6 @@
 <div align="center">
 
-# 💎 Match-3 Multiplayer Arena
+# 💎 Match-3 game
 
 **A real-time competitive Match-3 game built with Unity and Photon Fusion.**
 
@@ -17,9 +17,9 @@
 
 ## 📖 About The Project
 
-This project is a networked competitive Match-3 game designed to demonstrate a deep understanding of **client-server architecture**, **real-time state synchronization**, and **clean code principles**. 
+This game is a competitive take on the popular Match-3 genre, designed for both puzzle enthusiasts and fans of intense head-to-head matches.
 
-Built entirely in C# using Unity and Photon Fusion (Shared Mode), it features secure authoritative logic, robust session management, and highly optimized UI animations.
+You can choose the format that suits you best: launch the Solo Mode to play offline, peacefully collect crystals, trigger powerful bombs, and set personal records. Alternatively, challenge your friends in the Online Multiplayer Mode by connecting to a shared room! In multiplayer, every second counts: spot the best combinations faster than your opponent and score the maximum points before the match timer runs out.
 
 ## ✨ Key Features
 
