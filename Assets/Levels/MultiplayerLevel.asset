@@ -13,11 +13,9 @@ MonoBehaviour:
   m_Name: MultiplayerLevel
   m_EditorClassIdentifier: Assembly-CSharp::LevelData
   boardWidth: 8
-  boardHeight: 9
+  boardHeight: 7
   boardLayout:
     rows:
-    - row: 0000000000000000
-    - row: 0000000000000000
     - row: 0000000000000000
     - row: 0000000000000000
     - row: 0000000000000000

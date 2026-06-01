@@ -4,6 +4,10 @@ using UnityEngine.UI;
 
 namespace Multiplayer
 {
+    /// <summary>
+    /// A visual representation of the opponent's board. It handles no gameplay logic, 
+    /// acting strictly as a listener for network state changes to trigger DOTween animations.
+    /// </summary>
     public class DummyBoard : MonoBehaviour
     {
         [SerializeField] private BoardService _mainBoard; 
@@ -106,7 +110,7 @@ namespace Multiplayer
             
             if (newValue <= 0)
             {
-                cellObj.transform.DOScale(Vector3.zero, 0.15f).OnComplete(() => 
+                cellObj.transform.DOScale(Vector3.zero, 0.15f).SetLink(cellObj).OnComplete(() => 
                 {
                     SetComponentSprite(spriteRenderer, image, null);
                     cellObj.transform.localScale = Vector3.one;
@@ -121,11 +125,11 @@ namespace Multiplayer
                 cellObj.transform.localPosition = new Vector3(targetLocalPos.x, targetLocalPos.y + offset, targetLocalPos.z);
                 
                 cellObj.transform.DOLocalMove(targetLocalPos, 0.25f).SetEase(Ease.OutQuad)
-                    .SetLink(cellObj);;
+                    .SetLink(cellObj);
                 
                 cellObj.transform.localScale = Vector3.zero;
                 cellObj.transform.DOScale(Vector3.one, 0.15f)
-                    .SetLink(cellObj);;
+                    .SetLink(cellObj);
                 
             }
         }

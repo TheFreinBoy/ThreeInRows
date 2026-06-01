@@ -17,7 +17,7 @@ namespace Multiplayer
             var oldRunners = FindObjectsByType<NetworkRunner>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             foreach (var oldRunner in oldRunners)
             {
-                Debug.Log("<color=yellow>[СЕТЬ] Найдена старая сессия. Отключаем и удаляем...</color>");
+                Debug.Log("<color=yellow>[Network] Deleting old session </color>");
                 oldRunner.Shutdown(); 
                 Destroy(oldRunner.gameObject); 
             }

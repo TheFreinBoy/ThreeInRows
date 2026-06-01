@@ -3,6 +3,10 @@ using Fusion;
 
 namespace Multiplayer
 {
+    /// <summary>
+    /// Monitors the active network session for opponent disconnections. 
+    /// If a player leaves an ongoing match or the connection unexpectedly drops, it automatically triggers a win for the remaining player.
+    /// </summary>
     public class NetworkDisconnectObserver : MonoBehaviour
     {
         [SerializeField] private GameStateService _gameState;

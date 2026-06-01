@@ -4,6 +4,10 @@ using UnityEngine;
 
 namespace Multiplayer
 {
+    /// <summary>
+    /// Synchronizes the match countdown timer across the network. 
+    /// Automatically handles end-game logic and determines the winner based on player scores when the time expires.
+    /// </summary>
     public class NetworkTimerService : NetworkBehaviour
     {
         [SerializeField] private TMP_Text _timerText;
@@ -23,6 +27,10 @@ namespace Multiplayer
             _isGameFinishedLocal = false;
         }
         
+        /// <summary>
+        /// Starts the networked countdown timer. 
+        /// Execution is restricted to the State Authority to ensure exact synchronization across all clients.
+        /// </summary>
         public void StartTimer()
         {
             if (HasStateAuthority)

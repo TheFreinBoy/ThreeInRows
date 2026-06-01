@@ -5,6 +5,10 @@ using Random = UnityEngine.Random;
 using Multiplayer;
 using Fusion;
 
+/// <summary>
+/// Main controller for the game board. 
+/// Manages grid initialization, gravity, bonuses, and network state synchronization for multiplayer.
+/// </summary>
 [RequireComponent(typeof(CellFactory))]
 public class BoardService : MonoBehaviour
 {
@@ -141,6 +145,11 @@ public class BoardService : MonoBehaviour
         _destructionHandler.UpdateEffectPools();
         _gravitySystem.ApplyGravity();
     }
+    
+    /// <summary>
+    /// Attempts to swap two cells. 
+    /// If there is no match or a bonus is triggered, the cells will return to their original positions.
+    /// </summary>
     public void FlipCells(Point firstPoint, Point secondPoint, bool main)
     {
         if(GetCellTypeAtPoint(firstPoint) < 0 )
@@ -235,6 +244,11 @@ public class BoardService : MonoBehaviour
             ? CellData.CellType.Blank
             : availableCellTypes[Random.Range(0, availableCellTypes.Count)];
     }
+    
+    /// <summary>
+    /// Returns the cell type at the specified grid coordinates. 
+    /// If the coordinates are out of bounds, returns a Hole.
+    /// </summary>
     public CellData.CellType GetCellTypeAtPoint(Point point)
     {
         if (point.x < 0 || point.x >= _currentLevel.boardWidth || point.y < 0 || point.y >= _currentLevel.boardHeight)   
@@ -264,6 +278,9 @@ public class BoardService : MonoBehaviour
         return _board[point.x, point.y];
     }
     
+    /// <summary>
+    /// Converts logical grid coordinates (X, Y) into actual Unity world coordinates (Vector2) for rendering.
+    /// </summary>
     public Vector2 GetBoardPositionFromPoint(Point point)
     {
         float startX = -(_currentLevel.boardWidth * Config.PieceSize) / 2f + Config.PieceSize / 2f;
@@ -302,6 +319,11 @@ public class BoardService : MonoBehaviour
     }
     
     // Network
+    
+    /// <summary>
+    /// Sends cell type data to the network to be rendered on the opponent's dummy board.
+    /// Safely ignores the call if the player is running in local offline mode.
+    /// </summary>
     public void SendCellToNetwork(int x, int y, CellData.CellType type)
     {
         if (!_isMultiplayerActive) return;

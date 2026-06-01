@@ -4,6 +4,11 @@ using UnityEngine;
 
 namespace Multiplayer
 {
+    
+    /// <summary>
+    /// Represents a player's network state in the match. 
+    /// Handles score synchronization and automatically updates the corresponding UI elements (local or enemy).
+    /// </summary>
     public class PlayerState : NetworkBehaviour
     {
         [Networked] public int Score { get; set; }
