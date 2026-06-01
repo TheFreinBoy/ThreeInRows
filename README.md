@@ -42,7 +42,8 @@ The codebase is highly modular, utilizing strict separation of concerns to keep 
 
 ⏱️ Estimation & Time Tracking
 
-To maintain a structured development process, feature estimations, bug fixes, and network synchronization tasks were planned and tracked externally. The total estimated time for this project is ~32 hours.
+To maintain a structured development process, feature estimations, bug fixes, and network synchronization tasks were planned and tracked externally. The total estimated time for this project is ~32 hours. 
+
 📊 [**View Detailed Estimation Tracker on Google Sheets**](https://docs.google.com/spreadsheets/d/1wObyJkTYyLdL5nhzleQBVyJh4kq5mrFOmAjm4NwGSiw/edit?usp=sharing)
 
 
