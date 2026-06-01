@@ -9,6 +9,8 @@
 [![C#](https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=c-sharp&logoColor=white)](#)
 [![DOTween](https://img.shields.io/badge/DOTween-Pro-brightgreen?style=for-the-badge)](#)
 
+<img width="692" height="388" alt="2026-06-01 17-28-15 (1)" src="https://github.com/user-attachments/assets/40dd08a1-5967-49a2-b669-899e52a6b719" />
+
 </div>
 
 <br/>
