@@ -6,7 +6,6 @@ using Fusion;
 public class TimerService : MonoBehaviour
 {
     [SerializeField] private TMP_Text _timerText;
-    [SerializeField] private float _initialTime = 30f; 
     [SerializeField] private float _timeAddOnMatch = 1f; 
     
     private float _remainingTime;

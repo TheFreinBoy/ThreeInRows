@@ -1,3 +1,4 @@
+using System;
 using Fusion;
 using TMPro;
 using UnityEngine;
@@ -11,13 +12,22 @@ namespace Multiplayer
         public int gameSceneIndex = 1;
         private NetworkRunner _runner;
 
+        private void Start()
+        {
+            var oldRunners = FindObjectsByType<NetworkRunner>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var oldRunner in oldRunners)
+            {
+                Debug.Log("<color=yellow>[СЕТЬ] Найдена старая сессия. Отключаем и удаляем...</color>");
+                oldRunner.Shutdown(); 
+                Destroy(oldRunner.gameObject); 
+            }
+        }
+        
         public async void ConnectToRoom()
         {
             if (string.IsNullOrEmpty(roomInput.text))
-            {
                 return;
-            }
-
+            
             if (_runner == null)
             {
                 _runner = Instantiate(runnerPrefab);

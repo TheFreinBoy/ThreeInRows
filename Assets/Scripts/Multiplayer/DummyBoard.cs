@@ -96,7 +96,6 @@ namespace Multiplayer
             }
         }
 
-
         private void AnimateCellChange(int x, int y, int newValue,  int index)
         {
             GameObject cellObj = _dummyCells[index];
@@ -121,10 +120,13 @@ namespace Multiplayer
                 float offset = 0.6f; 
                 cellObj.transform.localPosition = new Vector3(targetLocalPos.x, targetLocalPos.y + offset, targetLocalPos.z);
                 
-                cellObj.transform.DOLocalMove(targetLocalPos, 0.25f).SetEase(Ease.OutQuad);
+                cellObj.transform.DOLocalMove(targetLocalPos, 0.25f).SetEase(Ease.OutQuad)
+                    .SetLink(cellObj);;
                 
                 cellObj.transform.localScale = Vector3.zero;
-                cellObj.transform.DOScale(Vector3.one, 0.15f);
+                cellObj.transform.DOScale(Vector3.one, 0.15f)
+                    .SetLink(cellObj);;
+                
             }
         }
 

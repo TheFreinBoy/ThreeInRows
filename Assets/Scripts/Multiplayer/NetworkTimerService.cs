@@ -64,7 +64,7 @@ namespace Multiplayer
             if (gameState == null) return;
 
             var players = FindObjectsByType<PlayerState>(FindObjectsSortMode.None);
-            if (players.Length < 2) return;
+            //if (players.Length < 2) return;
 
             PlayerState myPlayer = null;
             PlayerState enemyPlayer = null;

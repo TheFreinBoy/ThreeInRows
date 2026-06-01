@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using StaticData;
 
 /// <summary>
 /// Manages cell updates in the game loop

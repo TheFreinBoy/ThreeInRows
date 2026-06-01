@@ -74,7 +74,8 @@ public class ScoreService : MonoBehaviour
             
         DOTween.Sequence()
             .Append(_scoreText.transform.DOScale(new Vector3(1.2f, 1.2f, 1.2f), 0.3f))
-            .Append(_scoreText.transform.DOScale(Vector3.one, 0.3f));
+            .Append(_scoreText.transform.DOScale(Vector3.one, 0.3f))
+            .SetLink(_scoreText.gameObject);;
     }
 
     private void UpdateScoreDisplay()
